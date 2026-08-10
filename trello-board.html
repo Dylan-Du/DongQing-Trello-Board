@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>东青Trello看板</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a1428;
+  --bg-elev: #0f2040;
+  --list-bg: rgba(15, 32, 64, 0.45);
+  --list-border: rgba(100, 180, 255, 0.1);
+  --card-bg: rgba(20, 42, 75, 0.5);
+  --card-bg-hover: rgba(28, 55, 95, 0.55);
+  --text: #ffffff;
+  --text-dim: #a0b4cc;
+  --text-faint: #6a7e98;
+  --accent: #3b82f6;
+  --accent-2: #60a5fa;
+  --accent-grad: linear-gradient(135deg, #3b82f6, #60a5fa);
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #eab308;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow-card: 0 0 0 1px rgba(100,180,255,0.04), inset 0 1px 0 rgba(255,255,255,0.03);
+  --shadow-card-hover: 0 0 0 1px rgba(100,180,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  --shadow-drag: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(100,180,255,0.15);
+  --shadow-modal: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(100,180,255,0.08);
+  --transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+  --flip-duration: 0.32s;
+  --flip-easing: cubic-bezier(0.2, 0, 0, 1);
+  /* Surface & overlay tokens */
+  --hover-overlay: rgba(100,180,255,0.06);
+  --hover-overlay-strong: rgba(100,180,255,0.1);
+  --border-overlay: rgba(100,180,255,0.08);
+  --border-overlay-strong: rgba(100,180,255,0.14);
+  --input-bg: rgba(0,0,0,0.2);
+  --input-bg-light: rgba(0,0,0,0.15);
+  --header-bg: rgba(10, 20, 40, 0.55);
+  --header-border: rgba(100,180,255,0.06);
+  --overlay-bg: rgba(5, 12, 28, 0.65);
+  --scrollbar-thumb: rgba(100,180,255,0.1);
+  --scrollbar-thumb-hover: rgba(100,180,255,0.2);
+  --shadow-list: 0 0 0 1px rgba(100,180,255,0.04);
+  --surface-tint: rgba(100,180,255,0.04);
+  --surface-tint-light: rgba(100,180,255,0.025);
+  --bg-glow-1: rgba(59, 130, 246, 0.12);
+  --bg-glow-2: rgba(96, 165, 250, 0.08);
+  --bg-glow-3: rgba(30, 64, 175, 0.06);
+  --context-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  --context-border: rgba(100,180,255,0.1);
+}
+
+/* ===== Light Theme ===== */
+[data-theme="light"] {
+  --bg: #f0f4f8;
+  --bg-elev: #ffffff;
+  --list-bg: rgba(255, 255, 255, 0.7);
+  --list-border: rgba(0,0,0,0.06);
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-bg-hover: rgba(245, 247, 250, 0.85);
+  --text: #1e293b;
+  --text-dim: #64748b;
+  --text-faint: #94a3b8;
+  --shadow-card: 0 0 0 1px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 0 0 1px rgba(59,130,246,0.1), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-drag: 0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(59,130,246,0.1);
+  --shadow-modal: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+  --hover-overlay: rgba(59,130,246,0.05);
+  --hover-overlay-strong: rgba(59,130,246,0.08);
+  --border-overlay: rgba(0,0,0,0.06);
+  --border-overlay-strong: rgba(0,0,0,0.1);
+  --input-bg: rgba(0,0,0,0.03);
+  --input-bg-light: rgba(0,0,0,0.02);
+  --header-bg: rgba(255, 255, 255, 0.65);
+  --header-border: rgba(0,0,0,0.05);
+  --overlay-bg: rgba(15, 23, 42, 0.2);
+  --scrollbar-thumb: rgba(0,0,0,0.1);
+  --scrollbar-thumb-hover: rgba(0,0,0,0.18);
+  --shadow-list: 0 0 0 1px rgba(0,0,0,0.03);
+  --surface-tint: rgba(59,130,246,0.03);
+  --surface-tint-light: rgba(59,130,246,0.02);
+  --bg-glow-1: rgba(59, 130, 246, 0.04);
+  --bg-glow-2: rgba(96, 165, 250, 0.03);
+  --bg-glow-3: rgba(30, 64, 175, 0.02);
+  --context-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  --context-border: rgba(0,0,0,0.06);
+}
+html {
+  background: var(--bg);
+}
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--text);
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  background: var(--bg);
+  background-image:
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-elev) 100%),
+    radial-gradient(ellipse at 15% 0%, var(--bg-glow-1) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, var(--bg-glow-2) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, var(--bg-glow-3) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+[data-theme="light"] body {
+  background-image:
+    linear-gradient(180deg, #f0f4f8 0%, #e8eef5 100%),
+    radial-gradient(ellipse at 15% 0%, var(--bg-glow-1) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, var(--bg-glow-2) 0%, transparent 55%);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ===== Header ===== */
+#header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px 0 80px;
+  background: var(--header-bg);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-bottom: 1px solid var(--header-border);
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* Buttons inside header should not be draggable */
+#header button, #header #board-title {
+  -webkit-app-region: no-drag;
+}
+#board-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.header-spacer { flex: 1; }
+
+#theme-toggle {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+#theme-toggle:hover { background: var(--hover-overlay-strong); border-color: var(--border-overlay-strong); transform: translateY(-1px); }
+#theme-toggle svg { width: 18px; height: 18px; color: var(--accent); transition: all 0.3s ease; }
+#theme-toggle:hover svg { color: var(--accent-2); }
+#theme-toggle .icon-sun { display: none; }
+#theme-toggle .icon-moon { display: block; }
+[data-theme="light"] #theme-toggle .icon-sun { display: block; }
+[data-theme="light"] #theme-toggle .icon-moon { display: none; }
+
+#add-list-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-grad);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+}
+#add-list-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+#add-list-btn:active { transform: translateY(0); }
+
+/* ===== Board ===== */
+#board {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: calc(100vh - 60px);
+  align-items: flex-start;
+}
+
+/* ===== List ===== */
+.list {
+  display: flex;
+  flex-direction: column;
+  width: 290px;
+  min-width: 290px;
+  max-height: calc(100vh - 60px - 24px);
+  background: var(--list-bg);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--list-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-list);
+  overflow: hidden;
+  position: relative;
+}
+.list.dragging { opacity: 0.3; }
+.list-list-header-dragging { cursor: grabbing; }
+
+.list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+}
+.list-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: grab;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-title:focus {
+  outline: none;
+  background: var(--input-bg);
+  border-color: var(--accent);
+  cursor: text;
+}
+.list-count {
+  font-size: 11px;
+  color: var(--accent-2);
+  background: var(--hover-overlay);
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.list-menu-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.list-menu-btn:hover { background: var(--hover-overlay-strong); color: var(--text); }
+
+.list-cards {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 10px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 8px;
+}
+
+.list-footer {
+  padding: 8px 10px 12px;
+  flex-shrink: 0;
+}
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px dashed var(--border-overlay-strong);
+  border-radius: 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.add-card-btn:hover { background: var(--surface-tint); color: var(--accent-2); border-color: var(--accent); }
+
+.add-card-form { display: flex; flex-direction: column; gap: 8px; }
+.add-card-form textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+}
+.add-card-form-actions { display: flex; gap: 8px; align-items: center; }
+.btn-confirm {
+  padding: 6px 14px;
+  background: var(--accent-grad);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+.btn-confirm:hover { transform: translateY(-1px); }
+.btn-cancel {
+  width: 28px; height: 28px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all var(--transition);
+}
+.btn-cancel:hover { background: var(--hover-overlay-strong); color: var(--text); }
+
+/* ===== Card ===== */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--border-overlay);
+  border-radius: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: background var(--transition), box-shadow var(--transition), border-color var(--transition);
+  position: relative;
+  user-select: none;
+}
+.card:hover { background: var(--card-bg-hover); box-shadow: var(--shadow-card-hover); border-color: var(--border-overlay-strong); }
+.card.dragging { visibility: hidden; }
+.card-ghost {
+  position: fixed !important;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: var(--shadow-drag) !important;
+  opacity: 0.95;
+  transform: rotate(3deg);
+  transition: none !important;
+  will-change: transform;
+}
+
+.card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.card-label {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.card-title { font-size: 13px; line-height: 1.4; word-break: break-word; color: var(--text); }
+.card-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.card-badge { display: flex; align-items: center; gap: 3px; }
+.card-badge svg { width: 12px; height: 12px; color: var(--accent); }
+
+/* Drop indicator */
+.drop-indicator {
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin: -2px 0;
+  box-shadow: 0 0 12px rgba(59,130,246,0.6);
+  animation: pulse-indicator 1s ease-in-out infinite;
+}
+@keyframes pulse-indicator {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ===== Add List Placeholder ===== */
+.add-list-placeholder {
+  width: 290px;
+  min-width: 290px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: var(--surface-tint);
+  border: 1px dashed var(--border-overlay-strong);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.add-list-placeholder:hover { background: var(--hover-overlay); color: var(--accent-2); border-color: var(--accent); }
+.add-list-placeholder textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+}
+
+/* ===== Modal ===== */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#modal-overlay.active { display: flex; opacity: 1; }
+
+#modal {
+  width: 680px;
+  max-width: 92vw;
+  max-height: 86vh;
+  background: var(--bg-elev);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--border-overlay);
+  border-radius: 24px;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: fixed;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px 26px 12px;
+  flex-shrink: 0;
+}
+.modal-header-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-grad);
+  border-radius: 10px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.modal-header-icon svg { width: 18px; height: 18px; color: #fff; }
+.modal-title-wrap { flex: 1; min-width: 0; }
+.modal-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 5px 10px;
+  width: 100%;
+  outline: none;
+  cursor: text;
+}
+.modal-title:focus { background: var(--input-bg); border-color: var(--accent); }
+.modal-subtitle { font-size: 12px; color: var(--text-faint); padding: 0 10px; margin-top: 2px; }
+.modal-close {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 22px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.modal-close:hover { background: var(--hover-overlay-strong); color: var(--text); }
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 26px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.modal-section h3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modal-section h3 svg { width: 14px; height: 14px; color: var(--accent); }
+
+/* Labels in modal */
+.modal-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.modal-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+  position: relative;
+}
+.modal-label-text {
+  outline: none;
+  cursor: text;
+  border-radius: 4px;
+  padding: 1px 2px;
+  min-width: 20px;
+}
+.modal-label-text:focus {
+  background: rgba(0,0,0,0.2);
+}
+.modal-label-remove {
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.2);
+  border: none;
+  border-radius: 50%;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.modal-label-remove:hover { background: rgba(0,0,0,0.4); }
+
+.label-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.label-color-btn {
+  width: 38px; height: 30px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.label-color-btn:hover { transform: scale(1.08); }
+.label-color-btn.active { border-color: #fff; }
+.label-color-btn.active::after {
+  content: '✓';
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Description */
+.modal-desc {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px 14px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.modal-desc:focus { border-color: var(--accent); }
+
+/* Subtasks */
+.subtask-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.subtask-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border-overlay);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.subtask-progress-fill {
+  height: 100%;
+  background: var(--accent-grad);
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+.subtask-progress-text { font-size: 12px; color: var(--accent-2); font-weight: 600; white-space: nowrap; }
+
+.subtask-list { display: flex; flex-direction: column; gap: 4px; }
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-tint-light);
+  border: 1px solid var(--surface-tint);
+  border-radius: 12px;
+  transition: all var(--transition);
+}
+.subtask-item:hover { background: var(--hover-overlay); border-color: var(--border-overlay); }
+.subtask-item.done .subtask-text { text-decoration: line-through; color: var(--text-faint); }
+
+.subtask-checkbox {
+  width: 18px; height: 18px;
+  border: 2px solid var(--text-faint);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.subtask-item.done .subtask-checkbox {
+  background: var(--accent-grad);
+  border-color: transparent;
+}
+.subtask-item.done .subtask-checkbox::after {
+  content: '✓';
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+.subtask-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: text;
+}
+.subtask-delete {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.subtask-item:hover .subtask-delete { opacity: 1; }
+.subtask-delete:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+.subtask-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.subtask-add input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.subtask-add input:focus { border-color: var(--accent); }
+.subtask-add button {
+  padding: 10px 18px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  color: var(--accent-2);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.subtask-add button:hover { background: rgba(59,130,246,0.25); }
+
+.modal-footer {
+  padding: 14px 26px;
+  border-top: 1px solid var(--border-overlay);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.modal-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: var(--danger);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.modal-delete-btn:hover { background: rgba(239,68,68,0.2); }
+.modal-list-badge { font-size: 12px; color: var(--text-faint); }
+
+/* ===== Context Menu ===== */
+.context-menu {
+  position: fixed;
+  z-index: 5000;
+  background: var(--bg-elev);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--context-border);
+  border-radius: 14px;
+  box-shadow: var(--context-shadow);
+  padding: 6px;
+  min-width: 160px;
+  display: none;
+}
+.context-menu.active { display: block; }
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.context-menu-item:hover { background: var(--hover-overlay); }
+.context-menu-item.danger { color: var(--danger); }
+.context-menu-item.danger:hover { background: rgba(239,68,68,0.1); }
+
+/* ===== Utilities ===== */
+.no-select { user-select: none !important; -webkit-user-select: none !important; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header id="header">
+  <div id="board-title">东青Trello看板</div>
+  <div class="header-spacer"></div>
+  <button id="theme-toggle" title="切换主题">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+  <button id="add-list-btn">+ 添加列表</button>
+</header>
+
+<div id="board"></div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-header">
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h.01M8 12h8M8 17h.01"/></svg>
+      </div>
+      <div class="modal-title-wrap">
+        <div class="modal-title" contenteditable="true" spellcheck="false"></div>
+        <div class="modal-subtitle"></div>
+      </div>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg>
+          标签
+        </h3>
+        <div class="modal-labels"></div>
+        <div class="label-picker"></div>
+      </div>
+      <div class="modal-section">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          描述
+        </h3>
+        <textarea class="modal-desc" placeholder="添加更详细的描述..."></textarea>
+      </div>
+      <div class="modal-section">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          子任务清单
+        </h3>
+        <div class="subtask-progress">
+          <div class="subtask-progress-bar"><div class="subtask-progress-fill"></div></div>
+          <span class="subtask-progress-text">0/0</span>
+        </div>
+        <div class="subtask-list"></div>
+        <div class="subtask-add">
+          <input type="text" placeholder="添加子任务..." />
+          <button>添加</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-list-badge"></span>
+      <button class="modal-delete-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        删除卡片
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="context-menu" id="context-menu"></div>
+
+<script>
+/* ============================================================
+   State & Persistence
+   ============================================================ */
+const STORAGE_KEY = 'kanban-board-v1';
+const LABEL_COLORS = {
+  red:    { bg: '#ef4444', text: '#fff', name: '红色' },
+  orange: { bg: '#f97316', text: '#fff', name: '橙色' },
+  yellow: { bg: '#eab308', text: '#1a1a2e', name: '黄色' },
+  green:  { bg: '#22c55e', text: '#fff', name: '绿色' },
+  cyan:   { bg: '#06b6d4', text: '#fff', name: '青色' },
+  blue:   { bg: '#3b82f6', text: '#fff', name: '蓝色' },
+  purple: { bg: '#a855f7', text: '#fff', name: '紫色' },
+  pink:   { bg: '#ec4899', text: '#fff', name: '粉色' },
+};
+
+let state = {
+  boardTitle: '东青Trello看板',
+  lists: []
+};
+
+let uidCounter = 0;
+function uid(prefix) { return `${prefix}-${Date.now()}-${++uidCounter}`; }
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.lists) { state = parsed; return; }
+    }
+  } catch(e) {}
+  // Default sample data
+  state = {
+    boardTitle: '东青Trello看板',
+    lists: [
+      {
+        id: uid('list'), title: '待办',
+        cards: [
+          { id: uid('card'), title: '设计登录页面 UI 原型', description: '需要完成登录、注册、忘记密码三个页面的高保真设计稿，包含明暗主题适配。', labels: [{color:'purple',text:'设计'}], subtasks: [
+            { id: uid('sub'), text: '绘制线框图', done: true },
+            { id: uid('sub'), text: '完成高保真稿', done: false },
+            { id: uid('sub'), text: '明暗主题适配', done: false },
+          ]},
+          { id: uid('card'), title: '编写 API 接口文档', description: '', labels: [{color:'blue',text:'文档'}], subtasks: [
+            { id: uid('sub'), text: '用户认证接口', done: true },
+            { id: uid('sub'), text: '数据 CRUD 接口', done: false },
+          ]},
+        ]
+      },
+      {
+        id: uid('list'), title: '进行中',
+        cards: [
+          { id: uid('card'), title: '实现拖拽排序功能', description: '使用原生 Pointer Events 实现 FLIP 动画驱动的拖拽排序，支持跨列表移动。', labels: [{color:'green',text:'开发'},{color:'orange',text:'紧急'}], subtasks: [
+            { id: uid('sub'), text: '卡片拖拽', done: true },
+            { id: uid('sub'), text: '列表拖拽', done: true },
+            { id: uid('sub'), text: '边缘自动滚动', done: false },
+          ]},
+          { id: uid('card'), title: '数据库性能优化', description: '针对慢查询进行索引优化', labels: [{color:'green',text:'开发'}], subtasks: [] },
+        ]
+      },
+      {
+        id: uid('list'), title: '已完成',
+        cards: [
+          { id: uid('card'), title: '项目环境搭建', description: '', labels: [{color:'cyan',text:'运维'}], subtasks: [
+            { id: uid('sub'), text: '配置 CI/CD', done: true },
+            { id: uid('sub'), text: '部署开发服务器', done: true },
+          ]},
+          { id: uid('card'), title: '需求评审会议', description: '与产品团队完成第一轮需求评审', labels: [{color:'red',text:'会议'}], subtasks: [] },
+        ]
+      },
+    ]
+  };
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+/* ============================================================
+   Render
+   ============================================================ */
+const boardEl = document.getElementById('board');
+
+function renderBoard() {
+  boardEl.innerHTML = '';
+  state.lists.forEach((list, listIndex) => {
+    boardEl.appendChild(renderList(list, listIndex));
+  });
+  renderAddListPlaceholder();
+}
+
+function renderList(list, listIndex) {
+  const el = document.createElement('div');
+  el.className = 'list';
+  el.dataset.listId = list.id;
+  el.dataset.listIndex = listIndex;
+  el.innerHTML = `
+    <div class="list-header">
+      <div class="list-title" contenteditable="true" spellcheck="false">${escapeHtml(list.title)}</div>
+      <span class="list-count">${list.cards.length}</span>
+      <button class="list-menu-btn" title="列表操作">&#8943;</button>
+    </div>
+    <div class="list-cards"></div>
+    <div class="list-footer">
+      <button class="add-card-btn">+ 添加卡片</button>
+    </div>
+  `;
+  const cardsContainer = el.querySelector('.list-cards');
+  list.cards.forEach((card, cardIndex) => {
+    cardsContainer.appendChild(renderCard(card, list.id, cardIndex));
+  });
+  attachListEvents(el, list, listIndex);
+  return el;
+}
+
+function renderCard(card, listId, cardIndex) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.cardId = card.id;
+  el.dataset.listId = listId;
+
+  let labelsHtml = '';
+  if (card.labels && card.labels.length) {
+    labelsHtml = '<div class="card-labels">' + card.labels.map(l => {
+      const c = LABEL_COLORS[l.color] || LABEL_COLORS.blue;
+      return `<span class="card-label" style="background:${c.bg};color:${c.text}">${escapeHtml(l.text||'')}</span>`;
+    }).join('') + '</div>';
+  }
+
+  let badgesHtml = '';
+  if (card.subtasks && card.subtasks.length) {
+    const done = card.subtasks.filter(s => s.done).length;
+    badgesHtml = `<div class="card-badges">
+      <span class="card-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>${done}/${card.subtasks.length}</span>
+    </div>`;
+  }
+
+  el.innerHTML = `${labelsHtml}<div class="card-title">${escapeHtml(card.title)}</div>${badgesHtml}`;
+  attachCardEvents(el, card, listId);
+  return el;
+}
+
+function renderAddListPlaceholder() {
+  const existing = boardEl.querySelector('.add-list-placeholder');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'add-list-placeholder';
+  el.innerHTML = '+ 添加列表';
+  el.addEventListener('click', () => {
+    el.innerHTML = '<textarea placeholder="输入列表标题..." rows="1" style="min-height:36px"></textarea>';
+    const ta = el.querySelector('textarea');
+    ta.focus();
+    let confirmed = false;
+    const confirm = () => {
+      if (confirmed) return; confirmed = true;
+      const title = ta.value.trim();
+      if (title) {
+        state.lists.push({ id: uid('list'), title, cards: [] });
+        saveState();
+        renderBoard();
+      } else {
+        renderBoard();
+      }
+    };
+    const cancel = () => { if (confirmed) return; confirmed = true; renderBoard(); };
+    ta.addEventListener('blur', confirm);
+    ta.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); ta.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancel(); renderBoard(); }
+    });
+  });
+  boardEl.appendChild(el);
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+/* Cross-environment compatible animation frame helpers */
+function nextFrame(fn) {
+  setTimeout(fn, 16);
+}
+function animFrame(fn) {
+  return setTimeout(fn, 16);
+}
+function cancelAnim(id) {
+  clearTimeout(id);
+}
+
+/* ============================================================
+   FLIP Animation Helper
+   ============================================================ */
+function flipElements(elements, duration) {
+  const d = duration || 320;
+  // FIRST: record positions
+  const firstRects = new Map();
+  elements.forEach(el => {
+    if (el && el.isConnected) firstRects.set(el, el.getBoundingClientRect());
+  });
+  // Return controller — caller does DOM change, then calls play()
+  return {
+    play() {
+      // INVERT + PLAY
+      firstRects.forEach((firstRect, el) => {
+        if (!el.isConnected) return;
+        const lastRect = el.getBoundingClientRect();
+        const dx = firstRect.left - lastRect.left;
+        const dy = firstRect.top - lastRect.top;
+        if (dx !== 0 || dy !== 0) {
+          el.style.transition = 'none';
+          el.style.transform = `translate(${dx}px, ${dy}px)`;
+          // Force reflow
+          el.offsetHeight;
+          nextFrame(() => {
+            el.style.transition = `transform ${d}ms cubic-bezier(0.2,0,0,1)`;
+            el.style.transform = '';
+            const cleanup = () => {
+              el.style.transition = '';
+              el.style.transform = '';
+              el.removeEventListener('transitionend', cleanup);
+            };
+            el.addEventListener('transitionend', cleanup);
+          });
+        }
+      });
+    }
+  };
+}
+
+function getAllCardsForFlip() {
+  return Array.from(document.querySelectorAll('.card:not(.dragging)'));
+}
+
+function getAllListsForFlip() {
+  return Array.from(document.querySelectorAll('.list:not(.dragging)'));
+}
+
+/* ============================================================
+   Card Drag System
+   ============================================================ */
+let cardDrag = null;
+let isDragging = false;
+
+function attachCardEvents(el, card, listId) {
+  el.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('.card-label')) return;
+    // Don't start drag if clicking on interactive elements
+    const startX = e.clientX, startY = e.clientY;
+    let started = false;
+    const threshold = 5;
+
+    function onMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!started && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
+        started = true;
+        beginCardDrag(ev, el, card, listId);
+      }
+      if (started) {
+        ev.preventDefault();
+        updateCardDrag(ev);
+      }
+    }
+    function onUp(ev) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      if (started) {
+        endCardDrag(ev);
+      }
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  });
+
+  el.addEventListener('click', (e) => {
+    if (isDragging) { e.stopPropagation(); e.preventDefault(); return; }
+    openModal(el, card, listId);
+  });
+}
+
+function beginCardDrag(e, cardEl, card, listId) {
+  isDragging = true;
+  const rect = cardEl.getBoundingClientRect();
+  const ghost = cardEl.cloneNode(true);
+  ghost.classList.add('card-ghost');
+  ghost.classList.remove('dragging');
+  ghost.style.width = rect.width + 'px';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  document.body.appendChild(ghost);
+
+  cardEl.classList.add('dragging');
+
+  cardDrag = {
+    cardEl, card, ghost, listId,
+    offsetX: e.clientX - rect.left,
+    offsetY: e.clientY - rect.top,
+    lastTargetList: null,
+    lastTargetIndex: -1,
+    autoScrollRAF: null,
+    scrollDX: 0,
+    scrollDY: 0,
+    scrollContainerH: null,
+    scrollContainerV: null,
+  };
+  document.body.classList.add('no-select');
+}
+
+function updateCardDrag(e) {
+  if (!cardDrag) return;
+  const { ghost, offsetX, offsetY } = cardDrag;
+  // Move ghost
+  ghost.style.left = (e.clientX - offsetX) + 'px';
+  ghost.style.top = (e.clientY - offsetY) + 'px';
+
+  // Find drop target
+  ghost.style.pointerEvents = 'none';
+  const elements = document.elementsFromPoint(e.clientX, e.clientY);
+  ghost.style.pointerEvents = '';
+
+  const listCardsEl = elements.find(el => el.classList && el.classList.contains('list-cards'));
+  const listEl = elements.find(el => el.classList && el.classList.contains('list'));
+
+  let targetListEl = null;
+  let targetListCardsEl = null;
+
+  if (listCardsEl) {
+    targetListCardsEl = listCardsEl;
+    targetListEl = listCardsEl.closest('.list');
+  } else if (listEl) {
+    targetListEl = listEl;
+    targetListCardsEl = listEl.querySelector('.list-cards');
+  }
+
+  if (!targetListEl || !targetListCardsEl) {
+    // Check if over the board area but between lists
+    const board = document.getElementById('board');
+    const boardRect = board.getBoundingClientRect();
+    if (e.clientY > boardRect.top && e.clientY < boardRect.bottom) {
+      // Find closest list by X position
+      const lists = Array.from(document.querySelectorAll('.list:not(.dragging)'));
+      let closest = null, minDist = Infinity;
+      lists.forEach(l => {
+        const r = l.getBoundingClientRect();
+        const center = r.left + r.width / 2;
+        const dist = Math.abs(e.clientX - center);
+        if (dist < minDist) { minDist = dist; closest = l; }
+      });
+      if (closest) {
+        targetListEl = closest;
+        targetListCardsEl = closest.querySelector('.list-cards');
+      }
+    }
+  }
+
+  if (!targetListEl) {
+    handleAutoScroll(e);
+    return;
+  }
+
+  const targetListId = targetListEl.dataset.listId;
+  const cards = Array.from(targetListCardsEl.querySelectorAll('.card:not(.dragging)'));
+  let insertIndex = cards.length;
+  for (let i = 0; i < cards.length; i++) {
+    const r = cards[i].getBoundingClientRect();
+    const midY = r.top + r.height / 2;
+    if (e.clientY < midY) { insertIndex = i; break; }
+  }
+
+  // Check if position actually changed by comparing DOM neighbors
+  const cardParent = cardDrag.cardEl.parentElement;
+  const cardNextSibling = cardDrag.cardEl.nextElementSibling;
+  const targetNextSibling = insertIndex < cards.length ? cards[insertIndex] : null;
+  const wouldBeSameSpot = (cardParent === targetListCardsEl && cardNextSibling === targetNextSibling);
+
+  if (!wouldBeSameSpot) {
+    // FLIP
+    const allCards = getAllCardsForFlip();
+    const flip = flipElements(allCards);
+
+    // Move card element in DOM
+    if (insertIndex >= cards.length) {
+      targetListCardsEl.appendChild(cardDrag.cardEl);
+    } else {
+      targetListCardsEl.insertBefore(cardDrag.cardEl, cards[insertIndex]);
+    }
+
+    flip.play();
+    cardDrag.lastTargetList = targetListId;
+    cardDrag.lastTargetIndex = insertIndex;
+  }
+
+  handleAutoScroll(e, targetListCardsEl, targetListEl);
+}
+
+function handleAutoScroll(e, listCardsEl, listEl) {
+  const edge = 80;
+  const board = document.getElementById('board');
+  const boardRect = board.getBoundingClientRect();
+
+  // Horizontal scroll on board
+  let dx = 0;
+  if (e.clientX < boardRect.left + edge) {
+    dx = -Math.max(4, (edge - (e.clientX - boardRect.left)) / 3);
+  } else if (e.clientX > boardRect.right - edge) {
+    dx = Math.max(4, (edge - (boardRect.right - e.clientX)) / 3);
+  }
+
+  // Vertical scroll on list cards
+  let dy = 0;
+  if (listCardsEl) {
+    const r = listCardsEl.getBoundingClientRect();
+    if (e.clientY < r.top + edge) {
+      dy = -Math.max(4, (edge - (e.clientY - r.top)) / 3);
+    } else if (e.clientY > r.bottom - edge) {
+      dy = Math.max(4, (edge - (r.bottom - e.clientY)) / 3);
+    }
+  }
+
+  cardDrag.scrollDX = dx;
+  cardDrag.scrollDY = dy;
+  cardDrag.scrollContainerH = board;
+  cardDrag.scrollContainerV = listCardsEl;
+
+  if (dx !== 0 || dy !== 0) {
+    if (!cardDrag.autoScrollRAF) {
+      const scrollLoop = () => {
+        if (!cardDrag) return;
+        if (cardDrag.scrollDX !== 0 && cardDrag.scrollContainerH) {
+          cardDrag.scrollContainerH.scrollLeft += cardDrag.scrollDX;
+        }
+        if (cardDrag.scrollDY !== 0 && cardDrag.scrollContainerV) {
+          cardDrag.scrollContainerV.scrollTop += cardDrag.scrollDY;
+        }
+        cardDrag.autoScrollRAF = animFrame(scrollLoop);
+      };
+      cardDrag.autoScrollRAF = animFrame(scrollLoop);
+    }
+  } else {
+    if (cardDrag.autoScrollRAF) {
+      cancelAnim(cardDrag.autoScrollRAF);
+      cardDrag.autoScrollRAF = null;
+    }
+  }
+}
+
+function endCardDrag(e) {
+  if (!cardDrag) return;
+  const { cardEl, ghost, listId } = cardDrag;
+
+  // Stop auto scroll
+  if (cardDrag.autoScrollRAF) {
+    cancelAnim(cardDrag.autoScrollRAF);
+    cardDrag.autoScrollRAF = null;
+  }
+
+  // Get ghost final position
+  const ghostRect = ghost.getBoundingClientRect();
+
+  // Remove ghost
+  ghost.remove();
+
+  // Make card visible
+  cardEl.classList.remove('dragging');
+
+  // Get card's natural position
+  const cardRect = cardEl.getBoundingClientRect();
+  const dx = ghostRect.left - cardRect.left;
+  const dy = ghostRect.top - cardRect.top;
+
+  // Animate card from ghost position to natural position
+  cardEl.style.transition = 'none';
+  cardEl.style.transform = `translate(${dx}px, ${dy}px)`;
+  cardEl.offsetHeight; // force reflow
+  nextFrame(() => {
+    cardEl.style.transition = 'transform 0.22s cubic-bezier(0.2,0,0,1)';
+    cardEl.style.transform = '';
+    const cleanup = () => {
+      cardEl.style.transition = '';
+      cardEl.style.transform = '';
+      cardEl.removeEventListener('transitionend', cleanup);
+    };
+    cardEl.addEventListener('transitionend', cleanup);
+  });
+
+  // Update state
+  const newListEl = cardEl.closest('.list');
+  const newListId = newListEl.dataset.listId;
+  const newList = state.lists.find(l => l.id === newListId);
+  const oldList = state.lists.find(l => l.id === listId);
+  if (!newList || !oldList) { cardDrag = null; setTimeout(() => isDragging = false, 50); return; }
+
+  // Find card data
+  const cardIndex = oldList.cards.findIndex(c => c.id === cardDrag.card.id);
+  if (cardIndex === -1) { cardDrag = null; setTimeout(() => isDragging = false, 50); return; }
+
+  const cardData = oldList.cards.splice(cardIndex, 1)[0];
+
+  // Find new index in DOM
+  const cardsInNew = Array.from(newListEl.querySelectorAll('.card'));
+  const domIndex = cardsInNew.indexOf(cardEl);
+  newList.cards.splice(domIndex, 0, cardData);
+
+  // Update list counts
+  document.querySelectorAll('.list').forEach(l => {
+    const count = l.querySelectorAll('.card').length;
+    const countEl = l.querySelector('.list-count');
+    if (countEl) countEl.textContent = count;
+  });
+
+  saveState();
+  cardDrag = null;
+  setTimeout(() => { isDragging = false; }, 50);
+}
+
+/* ============================================================
+   List Drag System
+   ============================================================ */
+let listDrag = null;
+
+function attachListEvents(listEl, list, listIndex) {
+  const titleEl = listEl.querySelector('.list-title');
+  const menuBtn = listEl.querySelector('.list-menu-btn');
+  const addCardBtn = listEl.querySelector('.add-card-btn');
+
+  // Title editing
+  titleEl.addEventListener('blur', () => {
+    const newTitle = titleEl.textContent.trim();
+    if (newTitle && newTitle !== list.title) {
+      list.title = newTitle;
+      saveState();
+    } else {
+      titleEl.textContent = list.title;
+    }
+  });
+  titleEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+    if (e.key === 'Escape') { titleEl.textContent = list.title; titleEl.blur(); }
+  });
+
+  // List drag via title
+  titleEl.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    if (document.activeElement === titleEl) return; // don't drag when editing
+    const startX = e.clientX, startY = e.clientY;
+    let started = false;
+    const threshold = 5;
+
+    function onMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!started && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
+        started = true;
+        beginListDrag(ev, listEl, list);
+      }
+      if (started) {
+        ev.preventDefault();
+        updateListDrag(ev);
+      }
+    }
+    function onUp(ev) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      if (started) {
+        endListDrag(ev);
+      }
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  });
+
+  // Menu
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showContextMenu(e.clientX, e.clientY, [
+      { label: '清空卡片', icon: '🗑', action: () => {
+        list.cards = [];
+        saveState();
+        renderBoard();
+      }},
+      { label: '删除列表', icon: '✕', danger: true, action: () => {
+        const idx = state.lists.findIndex(l => l.id === list.id);
+        if (idx !== -1) {
+          state.lists.splice(idx, 1);
+          saveState();
+          renderBoard();
+        }
+      }},
+    ]);
+  });
+
+  // Add card
+  addCardBtn.addEventListener('click', () => {
+    const footer = listEl.querySelector('.list-footer');
+    const form = document.createElement('div');
+    form.className = 'add-card-form';
+    form.innerHTML = `
+      <textarea placeholder="输入卡片标题，按 Enter 添加..." rows="2"></textarea>
+      <div class="add-card-form-actions">
+        <button class="btn-confirm">添加</button>
+        <button class="btn-cancel">&times;</button>
+      </div>
+    `;
+    footer.innerHTML = '';
+    footer.appendChild(form);
+    const ta = form.querySelector('textarea');
+    ta.focus();
+
+    let confirmed = false;
+    const confirm = () => {
+      if (confirmed) return; confirmed = true;
+      const title = ta.value.trim();
+      if (title) {
+        list.cards.push({
+          id: uid('card'), title, description: '', labels: [], subtasks: []
+        });
+        saveState();
+        renderBoard();
+      } else {
+        restoreAddCardBtn(listEl);
+      }
+    };
+    ta.addEventListener('blur', confirm);
+    ta.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirm(); }
+      if (e.key === 'Escape') { e.preventDefault(); confirmed = true; restoreAddCardBtn(listEl); }
+    });
+    form.querySelector('.btn-confirm').addEventListener('mousedown', (e) => { e.preventDefault(); confirm(); });
+    form.querySelector('.btn-cancel').addEventListener('mousedown', (e) => { e.preventDefault(); confirmed = true; restoreAddCardBtn(listEl); });
+  });
+}
+
+function restoreAddCardBtn(listEl) {
+  renderBoard();
+}
+
+function beginListDrag(e, listEl, list) {
+  isDragging = true;
+  const rect = listEl.getBoundingClientRect();
+  const ghost = listEl.cloneNode(true);
+  ghost.classList.add('card-ghost');
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.borderRadius = '12px';
+  ghost.style.overflow = 'hidden';
+  document.body.appendChild(ghost);
+
+  listEl.classList.add('dragging');
+
+  listDrag = {
+    listEl, list, ghost,
+    offsetX: e.clientX - rect.left,
+    offsetY: e.clientY - rect.top,
+    lastInsertIndex: -1,
+    autoScrollRAF: null,
+    scrollDX: 0,
+  };
+  document.body.classList.add('no-select');
+}
+
+function updateListDrag(e) {
+  if (!listDrag) return;
+  const { ghost, offsetX, offsetY } = listDrag;
+  ghost.style.left = (e.clientX - offsetX) + 'px';
+  ghost.style.top = (e.clientY - offsetY) + 'px';
+
+  // Find target position
+  ghost.style.pointerEvents = 'none';
+  const elements = document.elementsFromPoint(e.clientX, e.clientY);
+  ghost.style.pointerEvents = '';
+
+  const board = document.getElementById('board');
+  const boardRect = board.getBoundingClientRect();
+
+  // If outside board area, just handle scroll
+  if (e.clientY < boardRect.top || e.clientY > boardRect.bottom) {
+    handleListAutoScroll(e);
+    return;
+  }
+
+  const lists = Array.from(document.querySelectorAll('.list:not(.dragging)'));
+  let insertIndex = lists.length;
+  let foundList = false;
+  for (let i = 0; i < lists.length; i++) {
+    const r = lists[i].getBoundingClientRect();
+    const midX = r.left + r.width / 2;
+    if (e.clientX < midX) { insertIndex = i; foundList = true; break; }
+  }
+
+  if (!foundList) {
+    // Check if over add-list-placeholder
+    const placeholder = boardEl.querySelector('.add-list-placeholder');
+    if (placeholder) {
+      const r = placeholder.getBoundingClientRect();
+      if (e.clientX > r.left) {
+        insertIndex = lists.length;
+        foundList = true;
+      }
+    }
+  }
+
+  const currentLists = Array.from(board.children).filter(c => c.classList.contains('list'));
+  // Check if position actually changed by comparing DOM neighbors
+  const listNextSibling = listDrag.listEl.nextElementSibling;
+  const targetNextSibling = insertIndex < lists.length ? lists[insertIndex] : null;
+  const wouldBeSame = (listDrag.listEl.parentElement === board && listNextSibling === targetNextSibling
+    || (listNextSibling && listNextSibling.classList.contains('add-list-placeholder') && !targetNextSibling));
+
+  if (!wouldBeSame) {
+    const allLists = getAllListsForFlip();
+    const flip = flipElements(allLists);
+
+    if (insertIndex >= lists.length) {
+      // Insert before the add-list-placeholder
+      const placeholder = boardEl.querySelector('.add-list-placeholder');
+      if (placeholder) {
+        board.insertBefore(listDrag.listEl, placeholder);
+      } else {
+        board.appendChild(listDrag.listEl);
+      }
+    } else {
+      board.insertBefore(listDrag.listEl, lists[insertIndex]);
+    }
+
+    flip.play();
+    listDrag.lastInsertIndex = insertIndex;
+  }
+
+  handleListAutoScroll(e);
+}
+
+function handleListAutoScroll(e) {
+  const edge = 80;
+  const board = document.getElementById('board');
+  const boardRect = board.getBoundingClientRect();
+  let dx = 0;
+  if (e.clientX < boardRect.left + edge) {
+    dx = -Math.max(4, (edge - (e.clientX - boardRect.left)) / 3);
+  } else if (e.clientX > boardRect.right - edge) {
+    dx = Math.max(4, (edge - (boardRect.right - e.clientX)) / 3);
+  }
+  listDrag.scrollDX = dx;
+  if (dx !== 0) {
+    if (!listDrag.autoScrollRAF) {
+      const loop = () => {
+        if (!listDrag) return;
+        if (listDrag.scrollDX !== 0) {
+          board.scrollLeft += listDrag.scrollDX;
+        }
+        listDrag.autoScrollRAF = animFrame(loop);
+      };
+      listDrag.autoScrollRAF = animFrame(loop);
+    }
+  } else {
+    if (listDrag.autoScrollRAF) {
+      cancelAnim(listDrag.autoScrollRAF);
+      listDrag.autoScrollRAF = null;
+    }
+  }
+}
+
+function endListDrag(e) {
+  if (!listDrag) return;
+  const { listEl, ghost } = listDrag;
+
+  if (listDrag.autoScrollRAF) {
+    cancelAnim(listDrag.autoScrollRAF);
+    listDrag.autoScrollRAF = null;
+  }
+
+  const ghostRect = ghost.getBoundingClientRect();
+  ghost.remove();
+
+  listEl.classList.remove('dragging');
+  const listRect = listEl.getBoundingClientRect();
+  const dx = ghostRect.left - listRect.left;
+  const dy = ghostRect.top - listRect.top;
+
+  listEl.style.transition = 'none';
+  listEl.style.transform = `translate(${dx}px, ${dy}px)`;
+  listEl.offsetHeight;
+  nextFrame(() => {
+    listEl.style.transition = 'transform 0.22s cubic-bezier(0.2,0,0,1)';
+    listEl.style.transform = '';
+    const cleanup = () => {
+      listEl.style.transition = '';
+      listEl.style.transform = '';
+      listEl.removeEventListener('transitionend', cleanup);
+    };
+    listEl.addEventListener('transitionend', cleanup);
+  });
+
+  // Update state order
+  const listEls = Array.from(boardEl.children).filter(c => c.classList.contains('list'));
+  const newOrder = listEls.map(el => state.lists.find(l => l.id === el.dataset.listId)).filter(Boolean);
+  state.lists = newOrder;
+  saveState();
+
+  listDrag = null;
+  setTimeout(() => { isDragging = false; }, 50);
+}
+
+/* ============================================================
+   Modal System
+   ============================================================ */
+const modalOverlay = document.getElementById('modal-overlay');
+const modalEl = document.getElementById('modal');
+let currentModalCard = null;
+let currentModalListId = null;
+
+function openModal(cardEl, card, listId) {
+  currentModalCard = card;
+  currentModalListId = listId;
+
+  const cardRect = cardEl.getBoundingClientRect();
+
+  // Populate modal content
+  modalEl.querySelector('.modal-title').textContent = card.title;
+  const list = state.lists.find(l => l.id === listId);
+  modalEl.querySelector('.modal-subtitle').textContent = `在列表「${list ? list.title : ''}」中`;
+  modalEl.querySelector('.modal-list-badge').textContent = list ? `列表: ${list.title}` : '';
+  modalEl.querySelector('.modal-desc').value = card.description || '';
+
+  renderModalLabels(card);
+  renderModalSubtasks(card);
+
+  // Show overlay
+  modalOverlay.style.display = 'flex';
+  modalOverlay.style.opacity = '0';
+
+  // Position modal at center with natural size for measuring
+  modalEl.style.left = '50%';
+  modalEl.style.top = '50%';
+  modalEl.style.transition = 'none';
+  modalEl.style.transform = 'translate(-50%, -50%)';
+  modalEl.style.opacity = '0';
+
+  // Force layout to get modal's natural rect (unscaled)
+  const modalRect = modalEl.getBoundingClientRect();
+
+  // Calculate transform to make modal appear at card's position
+  const modalCenterX = modalRect.left + modalRect.width / 2;
+  const modalCenterY = modalRect.top + modalRect.height / 2;
+  const cardCenterX = cardRect.left + cardRect.width / 2;
+  const cardCenterY = cardRect.top + cardRect.height / 2;
+
+  const dx = cardCenterX - modalCenterX;
+  const dy = cardCenterY - modalCenterY;
+  const scaleX = Math.max(0.1, cardRect.width / modalRect.width);
+  const scaleY = Math.max(0.1, cardRect.height / modalRect.height);
+
+  // Apply initial transform (at card position)
+  modalEl.style.transition = 'none';
+  modalEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scaleX}, ${scaleY})`;
+  modalEl.style.opacity = '1';
+  modalEl.style.transformOrigin = 'center center';
+
+  // Animate to open state
+  nextFrame(() => {
+    modalOverlay.style.transition = 'opacity 0.3s ease';
+    modalOverlay.style.opacity = '1';
+    modalOverlay.classList.add('active');
+
+    modalEl.style.transition = 'transform 0.42s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease';
+    modalEl.style.transform = 'translate(-50%, -50%) scale(1)';
+  });
+
+  attachModalEvents(card, listId);
+}
+
+function closeModal() {
+  if (!currentModalCard) return;
+  const card = currentModalCard;
+
+  // Find the card element in DOM for reverse animation
+  const cardEl = document.querySelector(`.card[data-card-id="${card.id}"]`);
+  let cardRect = null;
+  if (cardEl) {
+    cardRect = cardEl.getBoundingClientRect();
+  } else {
+    // Card may have been deleted
+    modalOverlay.style.opacity = '0';
+    setTimeout(() => {
+      modalOverlay.classList.remove('active');
+      modalOverlay.style.display = 'none';
+    }, 300);
+    currentModalCard = null;
+    return;
+  }
+
+  const modalRect = modalEl.getBoundingClientRect();
+  const modalCenterX = modalRect.left + modalRect.width / 2;
+  const modalCenterY = modalRect.top + modalRect.height / 2;
+  const cardCenterX = cardRect.left + cardRect.width / 2;
+  const cardCenterY = cardRect.top + cardRect.height / 2;
+
+  const dx = cardCenterX - modalCenterX;
+  const dy = cardCenterY - modalCenterY;
+  const scaleX = Math.max(0.1, cardRect.width / modalRect.width);
+  const scaleY = Math.max(0.1, cardRect.height / modalRect.height);
+
+  // Save any pending edits
+  saveModalEdits();
+
+  modalEl.style.transition = 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.1s';
+  modalEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scaleX}, ${scaleY})`;
+  modalEl.style.opacity = '0';
+
+  modalOverlay.style.transition = 'opacity 0.3s ease 0.1s';
+  modalOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    modalOverlay.classList.remove('active');
+    modalOverlay.style.display = 'none';
+    modalEl.style.transition = '';
+    modalEl.style.transform = '';
+    modalEl.style.opacity = '';
+  }, 400);
+
+  currentModalCard = null;
+}
+
+function saveModalEdits() {
+  if (!currentModalCard) return;
+  const card = currentModalCard;
+  const newTitle = modalEl.querySelector('.modal-title').textContent.trim();
+  if (newTitle) card.title = newTitle;
+  card.description = modalEl.querySelector('.modal-desc').value;
+
+  // Update card in DOM
+  const cardEl = document.querySelector(`.card[data-card-id="${card.id}"]`);
+  if (cardEl) {
+    const titleEl = cardEl.querySelector('.card-title');
+    if (titleEl) titleEl.textContent = card.title;
+  }
+
+  saveState();
+  // Re-render board to update badges/labels
+  renderBoard();
+}
+
+function attachModalEvents(card, listId) {
+  const closeBtn = modalEl.querySelector('.modal-close');
+  const titleEl = modalEl.querySelector('.modal-title');
+  const descEl = modalEl.querySelector('.modal-desc');
+  const deleteBtn = modalEl.querySelector('.modal-delete-btn');
+  const subtaskInput = modalEl.querySelector('.subtask-add input');
+  const subtaskBtn = modalEl.querySelector('.subtask-add button');
+
+  // Close on overlay click
+  modalOverlay.onclick = (e) => {
+    if (e.target === modalOverlay) closeModal();
+  };
+  closeBtn.onclick = closeModal;
+
+  // Title editing
+  titleEl.onblur = () => {
+    const newTitle = titleEl.textContent.trim();
+    if (newTitle && newTitle !== card.title) {
+      card.title = newTitle;
+      saveState();
+    } else {
+      titleEl.textContent = card.title;
+    }
+  };
+  titleEl.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+  };
+
+  // Description
+  descEl.onblur = () => {
+    card.description = descEl.value;
+    saveState();
+  };
+
+  // Delete card
+  deleteBtn.onclick = () => {
+    const list = state.lists.find(l => l.id === listId);
+    if (list) {
+      const idx = list.cards.findIndex(c => c.id === card.id);
+      if (idx !== -1) {
+        list.cards.splice(idx, 1);
+        saveState();
+        currentModalCard = null;
+        modalOverlay.classList.remove('active');
+        modalOverlay.style.display = 'none';
+        renderBoard();
+      }
+    }
+  };
+
+  // Subtask add
+  const addSubtask = () => {
+    const text = subtaskInput.value.trim();
+    if (text) {
+      card.subtasks = card.subtasks || [];
+      card.subtasks.push({ id: uid('sub'), text, done: false });
+      subtaskInput.value = '';
+      saveState();
+      renderModalSubtasks(card);
+    }
+  };
+  subtaskBtn.onclick = addSubtask;
+  subtaskInput.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addSubtask(); }
+  };
+
+  // Escape to close
+  document.addEventListener('keydown', modalKeydownHandler);
+}
+
+function modalKeydownHandler(e) {
+  if (e.key === 'Escape' && currentModalCard) {
+    closeModal();
+    document.removeEventListener('keydown', modalKeydownHandler);
+  }
+}
+
+function renderModalLabels(card) {
+  const container = modalEl.querySelector('.modal-labels');
+  const picker = modalEl.querySelector('.label-picker');
+  card.labels = card.labels || [];
+
+  container.innerHTML = card.labels.map((l, i) => {
+    const c = LABEL_COLORS[l.color] || LABEL_COLORS.blue;
+    const displayText = l.text || c.name;
+    return `<span class="modal-label" style="background:${c.bg};color:${c.text}">
+      <span class="modal-label-text" contenteditable="true" spellcheck="false" data-index="${i}">${escapeHtml(displayText)}</span>
+      <button class="modal-label-remove" data-index="${i}">&times;</button>
+    </span>`;
+  }).join('') || '<span style="color:var(--text-faint);font-size:12px">暂无标签</span>';
+
+  // Label text editing
+  container.querySelectorAll('.modal-label-text').forEach(textEl => {
+    const idx = parseInt(textEl.dataset.index);
+    const label = card.labels[idx];
+    if (!label) return;
+    textEl.addEventListener('blur', () => {
+      const newText = textEl.textContent.trim();
+      if (newText) {
+        label.text = newText;
+        saveState();
+      } else {
+        textEl.textContent = label.text || (LABEL_COLORS[label.color] || LABEL_COLORS.blue).name;
+      }
+    });
+    textEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); textEl.blur(); }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        textEl.textContent = label.text || (LABEL_COLORS[label.color] || LABEL_COLORS.blue).name;
+        textEl.blur();
+      }
+    });
+  });
+
+  // Label remove
+  container.querySelectorAll('.modal-label-remove').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index);
+      card.labels.splice(idx, 1);
+      saveState();
+      renderModalLabels(card);
+    };
+  });
+
+  // Color picker
+  picker.innerHTML = Object.entries(LABEL_COLORS).map(([key, c]) => {
+    const active = card.labels.some(l => l.color === key);
+    return `<button class="label-color-btn ${active ? 'active' : ''}" data-color="${key}" style="background:${c.bg}" title="${c.name}"></button>`;
+  }).join('');
+
+  picker.querySelectorAll('.label-color-btn').forEach(btn => {
+    btn.onclick = () => {
+      const color = btn.dataset.color;
+      const existing = card.labels.findIndex(l => l.color === color);
+      if (existing !== -1) {
+        card.labels.splice(existing, 1);
+      } else {
+        const c = LABEL_COLORS[color];
+        card.labels.push({ color, text: c.name });
+      }
+      saveState();
+      renderModalLabels(card);
+    };
+  });
+}
+
+function renderModalSubtasks(card) {
+  const listEl = modalEl.querySelector('.subtask-list');
+  const progressFill = modalEl.querySelector('.subtask-progress-fill');
+  const progressText = modalEl.querySelector('.subtask-progress-text');
+  card.subtasks = card.subtasks || [];
+
+  const done = card.subtasks.filter(s => s.done).length;
+  const total = card.subtasks.length;
+  const pct = total > 0 ? (done / total * 100) : 0;
+  progressFill.style.width = pct + '%';
+  progressText.textContent = `${done}/${total}`;
+
+  listEl.innerHTML = card.subtasks.map(s => `
+    <div class="subtask-item ${s.done ? 'done' : ''}" data-id="${s.id}">
+      <div class="subtask-checkbox"></div>
+      <div class="subtask-text" contenteditable="true" spellcheck="false">${escapeHtml(s.text)}</div>
+      <button class="subtask-delete">&times;</button>
+    </div>
+  `).join('') || '<div style="color:var(--text-faint);font-size:12px;padding:4px 0">暂无子任务</div>';
+
+  listEl.querySelectorAll('.subtask-item').forEach(item => {
+    const subId = item.dataset.id;
+    const sub = card.subtasks.find(s => s.id === subId);
+    if (!sub) return;
+
+    item.querySelector('.subtask-checkbox').onclick = () => {
+      sub.done = !sub.done;
+      saveState();
+      renderModalSubtasks(card);
+    };
+
+    const textEl = item.querySelector('.subtask-text');
+    textEl.onblur = () => {
+      const newText = textEl.textContent.trim();
+      if (newText && newText !== sub.text) {
+        sub.text = newText;
+        saveState();
+      } else {
+        textEl.textContent = sub.text;
+      }
+    };
+    textEl.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); textEl.blur(); }
+    };
+
+    item.querySelector('.subtask-delete').onclick = () => {
+      const idx = card.subtasks.findIndex(s => s.id === subId);
+      if (idx !== -1) {
+        card.subtasks.splice(idx, 1);
+        saveState();
+        renderModalSubtasks(card);
+      }
+    };
+  });
+}
+
+/* ============================================================
+   Context Menu
+   ============================================================ */
+const contextMenu = document.getElementById('context-menu');
+document.addEventListener('click', () => { contextMenu.classList.remove('active'); });
+
+function showContextMenu(x, y, items) {
+  contextMenu.innerHTML = items.map((item, i) =>
+    `<div class="context-menu-item ${item.danger ? 'danger' : ''}" data-index="${i}">${item.icon || ''} ${item.label}</div>`
+  ).join('');
+  contextMenu.style.left = x + 'px';
+  contextMenu.style.top = y + 'px';
+  contextMenu.classList.add('active');
+
+  contextMenu.querySelectorAll('.context-menu-item').forEach((el, i) => {
+    el.onclick = () => {
+      contextMenu.classList.remove('active');
+      items[i].action();
+    };
+  });
+}
+
+/* ============================================================
+   Board Title (read-only)
+   ============================================================ */
+const boardTitleEl = document.getElementById('board-title');
+
+/* Add list button */
+document.getElementById('add-list-btn').addEventListener('click', () => {
+  const placeholder = boardEl.querySelector('.add-list-placeholder');
+  if (placeholder) placeholder.click();
+});
+
+/* ============================================================
+   Theme Toggle
+   ============================================================ */
+const THEME_KEY = 'kanban-board-theme';
+
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  // Add transition class for smooth theme switch
+  document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+  const allElements = document.querySelectorAll('.list, .card, .list-header, .list-footer, .modal-header, .modal-body, .modal-footer, .context-menu, #header, .add-list-placeholder, .subtask-item');
+  allElements.forEach(el => {
+    el.style.transition = 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease';
+  });
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
+  // Clean up transitions after animation
+  setTimeout(() => {
+    document.body.style.transition = '';
+    allElements.forEach(el => { el.style.transition = ''; });
+  }, 350);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+// Load saved theme
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch(e) {}
+  applyTheme(saved);
+})();
+
+/* ============================================================
+   Init
+   ============================================================ */
+loadState();
+// Migrate old default board title
+if (state.boardTitle === '我的项目看板') {
+  state.boardTitle = '东青Trello看板';
+  saveState();
+}
+boardTitleEl.textContent = state.boardTitle;
+renderBoard();
+
+// Prevent default drag behaviors
+document.addEventListener('dragstart', e => e.preventDefault());
+
+// Handle window resize for modal
+window.addEventListener('resize', () => {
+  if (currentModalCard) {
+    // Reposition modal
+    modalEl.style.transition = 'none';
+    modalEl.style.transform = 'translate(-50%, -50%) scale(1)';
+  }
+});
+</script>
+</body>
+</html>

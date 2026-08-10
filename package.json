@@ -1,0 +1,47 @@
+{
+  "name": "dongqing-trello-board",
+  "version": "1.0.0",
+  "description": "东青Trello看板 - 高颜值本地看板应用，支持深色/浅色主题、毛玻璃质感、标签管理、子任务、拖拽排序",
+  "main": "main.js",
+  "author": "Dylan-Du",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.dongqing.trello-board",
+    "productName": "东青Trello看板",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "trello-board.html",
+      "icon.icns"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "东青Trello看板"
+    }
+  },
+  "devDependencies": {
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "license": "MIT",
+  "keywords": ["kanban", "trello", "board", "electron", "macos", "glassmorphism", "productivity"],
+  "homepage": "https://github.com/Dylan-Du/DongQing-Trello-Board",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dylan-Du/DongQing-Trello-Board.git"
+  }
+}

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#0f2040"/>
+    </linearGradient>
+    <!-- Glow -->
+    <radialGradient id="glow1" cx="30%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="85%" r="50%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Card glass effect -->
+    <linearGradient id="cardGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a5f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#152a4a" stop-opacity="0.85"/>
+    </linearGradient>
+    <!-- Accent gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <!-- Clip for rounded rect -->
+    <clipPath id="appClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224"/>
+    </clipPath>
+  </defs>
+
+  <!-- Base rounded rect background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="url(#bgGrad)"/>
+
+  <!-- Glow layers -->
+  <g clip-path="url(#appClip)">
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glow1)"/>
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glow2)"/>
+  </g>
+
+  <!-- Inner highlight (top edge) -->
+  <rect x="32" y="32" width="960" height="960" rx="200" ry="200" fill="none" stroke="rgba(100,180,255,0.08)" stroke-width="2"/>
+
+  <!-- Board container (glassmorphism panel) -->
+  <rect x="180" y="180" width="664" height="664" rx="48" ry="48"
+        fill="rgba(15,32,64,0.45)"
+        stroke="rgba(100,180,255,0.1)"
+        stroke-width="1.5"/>
+
+  <!-- Three kanban columns -->
+  <!-- Column 1 -->
+  <g transform="translate(220, 240)">
+    <rect width="176" height="544" rx="28" ry="28"
+          fill="url(#cardGlass)"
+          stroke="rgba(100,180,255,0.08)"
+          stroke-width="1"/>
+    <!-- Header dot -->
+    <circle cx="32" cy="36" r="8" fill="#3b82f6" opacity="0.9"/>
+    <!-- Cards -->
+    <rect x="20" y="68" width="136" height="72" rx="18" fill="rgba(59,130,246,0.12)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+    <rect x="20" y="156" width="136" height="52" rx="18" fill="rgba(59,130,246,0.08)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+    <rect x="20" y="224" width="136" height="88" rx="18" fill="rgba(59,130,246,0.1)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+  </g>
+
+  <!-- Column 2 (center, highlighted) -->
+  <g transform="translate(424, 240)">
+    <rect width="176" height="544" rx="28" ry="28"
+          fill="url(#cardGlass)"
+          stroke="rgba(100,180,255,0.14)"
+          stroke-width="1.5"/>
+    <!-- Header dot -->
+    <circle cx="32" cy="36" r="8" fill="#60a5fa"/>
+    <!-- Accent top bar -->
+    <rect x="20" y="60" width="136" height="3" rx="1.5" fill="url(#accentGrad)"/>
+    <!-- Cards -->
+    <rect x="20" y="76" width="136" height="100" rx="18" fill="rgba(96,165,250,0.15)" stroke="rgba(100,180,255,0.1)" stroke-width="1"/>
+    <rect x="20" y="192" width="136" height="64" rx="18" fill="rgba(96,165,250,0.1)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+    <rect x="20" y="272" width="136" height="80" rx="18" fill="rgba(96,165,250,0.08)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+  </g>
+
+  <!-- Column 3 -->
+  <g transform="translate(628, 240)">
+    <rect width="176" height="544" rx="28" ry="28"
+          fill="url(#cardGlass)"
+          stroke="rgba(100,180,255,0.08)"
+          stroke-width="1"/>
+    <!-- Header dot -->
+    <circle cx="32" cy="36" r="8" fill="#3b82f6" opacity="0.7"/>
+    <!-- Cards -->
+    <rect x="20" y="68" width="136" height="56" rx="18" fill="rgba(59,130,246,0.08)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+    <rect x="20" y="140" width="136" height="76" rx="18" fill="rgba(59,130,246,0.1)" stroke="rgba(100,180,255,0.06)" stroke-width="1"/>
+  </g>
+
+  <!-- Floating card (dragging state) -->
+  <g transform="translate(360, 520) rotate(-3)">
+    <rect width="140" height="72" rx="18"
+          fill="rgba(28,55,95,0.9)"
+          stroke="rgba(100,180,255,0.2)"
+          stroke-width="1.5"
+          filter="drop-shadow(0 8px 24px rgba(0,0,0,0.3))"/>
+    <rect x="16" y="16" width="40" height="6" rx="3" fill="url(#accentGrad)"/>
+    <rect x="16" y="30" width="80" height="4" rx="2" fill="rgba(255,255,255,0.25)"/>
+    <rect x="16" y="40" width="60" height="4" rx="2" fill="rgba(255,255,255,0.15)"/>
+  </g>
+</svg>
