@@ -1,53 +1,7 @@
 {
   "name": "dongqing-trello-board",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "东青Trello看板 - 高颜值本地看板应用",
   "main": "main.js",
-  "author": "DongQing",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-builder --mac",
-    "build:dmg": "electron-builder --mac dmg"
-  },
-  "build": {
-    "appId": "com.dongqing.trello-board",
-    "productName": "东青Trello看板",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "main.js",
-      "trello-board.html",
-      "icon.icns"
-    ],
-    "mac": {
-      "category": "public.app-category.productivity",
-      "icon": "icon.icns",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["arm64", "x64"]
-        }
-      ]
-    },
-    "dmg": {
-      "title": "东青Trello看板",
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    }
-  },
-  "devDependencies": {
-    "electron": "^43.3.0",
-    "electron-builder": "^26.15.3"
-  }
+  "author": "DongQing"
 }
