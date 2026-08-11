@@ -195,6 +195,49 @@ body {
 #add-list-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
 #add-list-btn:active { transform: translateY(0); }
 
+/* ===== View Switcher ===== */
+.view-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 14px;
+  -webkit-app-region: no-drag;
+}
+.view-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-app-region: no-drag;
+}
+.view-btn:hover {
+  background: var(--hover-overlay-strong);
+  color: var(--text);
+}
+.view-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.view-btn.active:hover {
+  background: var(--accent-2);
+  color: #fff;
+}
+.view-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* ===== Board ===== */
 #board {
   display: flex;
@@ -344,6 +387,21 @@ body {
   transition: all var(--transition);
 }
 .btn-cancel:hover { background: var(--hover-overlay-strong); color: var(--text); }
+
+/* Text cancel button (for modals with text label) */
+.btn-text-cancel {
+  height: 38px;
+  padding: 0 22px;
+  background: transparent;
+  border: 1px solid var(--border-overlay);
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+.btn-text-cancel:hover { background: var(--hover-overlay); color: var(--text); border-color: var(--border-overlay-strong); }
 
 /* ===== Card ===== */
 .card {
@@ -797,15 +855,646 @@ body {
 .context-menu-item.danger { color: var(--danger); }
 .context-menu-item.danger:hover { background: rgba(239,68,68,0.1); }
 
+/* ===== Due Date ===== */
+.due-date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-due-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color var(--transition);
+}
+.modal-due-input:focus { border-color: var(--accent); }
+[data-theme="light"] .modal-due-input { color-scheme: light; }
+.btn-clear-due {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-overlay);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.btn-clear-due:hover { background: rgba(239,68,68,0.15); color: var(--danger); border-color: rgba(239,68,68,0.3); }
+
+/* Card Due Date Badge */
+.card-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.card-due.due-overdue { background: rgba(239,68,68,0.15); color: #ef4444; }
+.card-due.due-today { background: rgba(234,179,8,0.15); color: #eab308; }
+.card-due.due-tomorrow { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.card-due.due-future { background: var(--hover-overlay); color: var(--text-dim); }
+
 /* ===== Utilities ===== */
 .no-select { user-select: none !important; -webkit-user-select: none !important; }
 .hidden { display: none !important; }
+
+/* ===== Stats View ===== */
+#stats-view {
+  padding: 24px 32px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.stats-header {
+  margin-bottom: 4px;
+}
+.stats-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.stats-cards {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1;
+  min-width: 160px;
+  padding: 22px 24px;
+  background: var(--card-bg);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--border-overlay);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+}
+.stat-card:hover {
+  background: var(--card-bg-hover);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-overlay-strong);
+  transform: translateY(-2px);
+}
+.stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  font-weight: 500;
+}
+.stats-charts {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.chart-box {
+  flex: 1;
+  min-width: 320px;
+  padding: 20px 24px;
+  background: var(--card-bg);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--border-overlay);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chart-box-wide {
+  flex: 2;
+  min-width: 500px;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  align-self: flex-start;
+}
+.chart-box canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== Calendar View ===== */
+#calendar-view {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+  padding: 16px 24px;
+  gap: 12px;
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+}
+.cal-nav-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.cal-nav-btn:hover { background: var(--hover-overlay-strong); color: var(--text); border-color: var(--border-overlay-strong); }
+.cal-month-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+  flex: 1;
+  min-width: 160px;
+}
+.cal-today-btn {
+  padding: 6px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.cal-today-btn:hover { background: var(--accent-2); transform: translateY(-1px); }
+.cal-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.cal-toggle-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cal-toggle-btn:hover { color: var(--text); background: var(--hover-overlay-strong); }
+.cal-toggle-btn.active { background: var(--accent); color: #fff; }
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  padding: 4px 0 8px;
+  flex-shrink: 0;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  flex: 1;
+  align-content: start;
+}
+.cal-day {
+  aspect-ratio: 1 / 1;
+  min-height: 80px;
+  padding: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.cal-day:hover { background: var(--card-bg-hover); border-color: var(--border-overlay-strong); box-shadow: var(--shadow-card-hover); }
+.cal-day.other-month { opacity: 0.35; }
+.cal-day.other-month:hover { opacity: 0.6; }
+.cal-day.today { border-color: var(--accent); border-width: 2px; }
+.cal-day-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cal-day.other-month .cal-day-header { color: var(--text-faint); }
+.cal-day-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.cal-day-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cal-day-more {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 600;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+/* Calendar Day Popup */
+.cal-day-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 900;
+  width: 360px;
+  max-width: 90vw;
+  max-height: 70vh;
+  background: var(--bg-elev);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--border-overlay-strong);
+  border-radius: 18px;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cal-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-overlay);
+  flex-shrink: 0;
+}
+.cal-popup-header span {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.cal-popup-close {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 22px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+.cal-popup-close:hover { background: var(--hover-overlay-strong); color: var(--text); }
+.cal-popup-cards {
+  padding: 12px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+.cal-popup-card {
+  padding: 10px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-overlay);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cal-popup-card:hover { background: var(--card-bg-hover); border-color: var(--border-overlay-strong); }
+.cal-popup-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.cal-popup-card-list {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+/* Week View */
+.week-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+.week-day {
+  background: var(--card-bg);
+  border: 1px solid var(--border-overlay);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 60px;
+}
+.week-day.today { border-color: var(--accent); border-width: 2px; }
+.week-day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.week-day-date {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.week-day-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.week-day-count {
+  font-size: 11px;
+  color: var(--accent-2);
+  background: var(--hover-overlay);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: auto;
+  font-weight: 600;
+}
+.week-card {
+  padding: 10px 14px;
+  background: var(--surface-tint-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.week-card:hover { background: var(--hover-overlay); border-color: var(--border-overlay-strong); }
+.week-card-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.week-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.week-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.week-card-list {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+
+/* ===== AI Summary ===== */
+.ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.ai-header .chart-title {
+  margin-bottom: 0;
+}
+.ai-settings-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.ai-settings-btn:hover {
+  background: var(--hover-overlay-strong);
+  color: var(--text);
+  border-color: var(--border-overlay-strong);
+}
+.ai-summary {
+  width: 100%;
+  padding: 16px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  min-height: 80px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+.ai-summary h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-2);
+  margin: 12px 0 6px;
+}
+.ai-summary h4:first-child { margin-top: 0; }
+.ai-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ai-summary li {
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ai-summary li::before {
+  content: '•';
+  color: var(--accent);
+  font-weight: 700;
+}
+.ai-summary pre {
+  white-space: pre-wrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+}
+.ai-placeholder {
+  color: var(--text-faint);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 13px;
+}
+.ai-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ai-generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--accent-grad);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+}
+.ai-generate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+.ai-generate-btn:active { transform: translateY(0); }
+.ai-generate-btn.ai-weekly {
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  color: var(--accent-2);
+}
+.ai-generate-btn.ai-weekly:hover {
+  background: rgba(59,130,246,0.25);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.15);
+}
+.ai-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===== AI Settings Modal ===== */
+.ai-settings-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-settings-content {
+  width: 420px;
+  max-width: 90vw;
+  padding: 24px;
+  background: var(--bg-elev);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--border-overlay);
+  border-radius: 20px;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ai-settings-content h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.ai-settings-content label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ai-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-overlay);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.ai-input:focus { border-color: var(--accent); }
+.ai-settings-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.btn-primary {
+  padding: 10px 22px;
+  background: var(--accent-grad);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+
+/* ===== AI Text Colors ===== */
+.ai-warning { color: #eab308; font-weight: 600; }
+.ai-danger { color: #ef4444; font-weight: 600; }
+.ai-success { color: #22c55e; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header id="header">
   <div id="board-title">东青Trello看板</div>
+  <div class="view-switcher">
+    <button class="view-btn active" data-view="board" title="看板视图">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button class="view-btn" data-view="calendar" title="日历视图">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+    <button class="view-btn" data-view="stats" title="统计视图">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </button>
+  </div>
   <div class="header-spacer"></div>
   <button id="theme-toggle" title="切换主题">
     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -815,6 +1504,88 @@ body {
 </header>
 
 <div id="board"></div>
+
+<div id="stats-view" style="display:none;">
+  <div class="stats-header"><h2 class="stats-title">📊 数据统计</h2></div>
+  <div class="stats-cards">
+    <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">总卡片数</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-weekly">0</div><div class="stat-label">本周完成</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-overdue">0</div><div class="stat-label">已过期</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-labels">0</div><div class="stat-label">标签总数</div></div>
+  </div>
+  <div class="stats-charts">
+    <div class="chart-box"><h3 class="chart-title">标签分布</h3><canvas id="chart-labels" width="300" height="300"></canvas></div>
+    <div class="chart-box"><h3 class="chart-title">列表健康度</h3><canvas id="chart-lists" width="400" height="300"></canvas></div>
+  </div>
+  <div class="stats-charts">
+    <div class="chart-box chart-box-wide"><h3 class="chart-title">近 30 天完成趋势</h3><canvas id="chart-trend" width="700" height="250"></canvas></div>
+  </div>
+  <div class="stats-charts">
+    <div class="chart-box chart-box-wide"><h3 class="chart-title">各列表卡片数对比</h3><canvas id="chart-list-compare" width="700" height="250"></canvas></div>
+  </div>
+  <div class="stats-charts">
+    <div class="chart-box chart-box-wide">
+      <div class="ai-header">
+        <h3 class="chart-title">&#x1f916; AI 智能摘要</h3>
+        <button id="ai-settings-btn" class="ai-settings-btn" title="AI 设置">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+      <div id="ai-summary" class="ai-summary">
+        <div class="ai-placeholder">点击下方按钮生成智能摘要</div>
+      </div>
+      <div class="ai-actions">
+        <button id="ai-generate-btn" class="ai-generate-btn">&#x2728; 生成今日摘要</button>
+        <button id="ai-weekly-btn" class="ai-generate-btn ai-weekly">&#x1f4cb; 生成周报</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="calendar-view" style="display:none;">
+  <div class="calendar-header">
+    <button id="cal-prev-month" class="cal-nav-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <h2 id="cal-month-title" class="cal-month-title"></h2>
+    <button id="cal-next-month" class="cal-nav-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button id="cal-today-btn" class="cal-today-btn">今天</button>
+    <div class="cal-view-toggle">
+      <button class="cal-toggle-btn active" data-calview="month">月</button>
+      <button class="cal-toggle-btn" data-calview="week">周</button>
+    </div>
+  </div>
+  <div class="cal-weekdays">
+    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+  </div>
+  <div id="cal-grid" class="cal-grid"></div>
+  <div id="cal-day-popup" class="cal-day-popup" style="display:none;">
+    <div class="cal-popup-header">
+      <span id="cal-popup-date"></span>
+      <button class="cal-popup-close">&times;</button>
+    </div>
+    <div id="cal-popup-cards" class="cal-popup-cards"></div>
+  </div>
+</div>
+
+<!-- AI 设置弹窗 -->
+<div id="ai-settings-modal" class="ai-settings-modal" style="display:none;">
+  <div class="ai-settings-content">
+    <h3>AI 设置</h3>
+    <label>API 地址</label>
+    <input type="text" id="ai-endpoint-input" placeholder="https://api.deepseek.com/chat/completions" class="ai-input">
+    <label>API Key</label>
+    <input type="password" id="ai-apikey-input" placeholder="sk-..." class="ai-input">
+    <label>模型</label>
+    <input type="text" id="ai-model-input" placeholder="deepseek-chat" class="ai-input">
+    <div class="ai-settings-actions">
+      <button id="ai-save-btn" class="btn-primary">保存</button>
+      <button id="ai-cancel-btn" class="btn-text-cancel">取消</button>
+    </div>
+  </div>
+</div>
 
 <div id="modal-overlay">
   <div id="modal">
@@ -843,6 +1614,16 @@ body {
           描述
         </h3>
         <textarea class="modal-desc" placeholder="添加更详细的描述..."></textarea>
+      </div>
+      <div class="modal-section">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          到期日
+        </h3>
+        <div class="due-date-row">
+          <input type="date" id="modal-due-date" class="modal-due-input">
+          <button id="modal-due-clear" class="btn-clear-due" title="清除到期日">&times;</button>
+        </div>
       </div>
       <div class="modal-section">
         <h3>
@@ -901,12 +1682,26 @@ function loadState() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && parsed.lists) { state = parsed; return; }
+      if (parsed && parsed.lists) {
+        state = parsed;
+        // Migrate cards: add missing fields
+        state.lists.forEach(list => {
+          (list.cards || []).forEach(card => {
+            if (card.dueDate === undefined) card.dueDate = null;
+            if (card.createdAt === undefined) card.createdAt = new Date().toISOString();
+            if (card.completedAt === undefined) card.completedAt = null;
+          });
+        });
+        return;
+      }
     }
   } catch(e) {}
   // Default sample data
   state = {
     boardTitle: '东青Trello看板',
+    aiApiKey: '',
+    aiEndpoint: 'https://api.deepseek.com/chat/completions',
+    aiModel: 'deepseek-chat',
     lists: [
       {
         id: uid('list'), title: '待办',
@@ -949,6 +1744,22 @@ function loadState() {
 
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function markCardIfCompleted(card, listTitle) {
+  const doneKeywords = /完成|done|已完成|完毕/i;
+  if (doneKeywords.test(listTitle || '')) {
+    card.completedAt = new Date().toISOString();
+  } else {
+    card.completedAt = null;
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
 
 /* ============================================================
@@ -1010,7 +1821,22 @@ function renderCard(card, listId, cardIndex) {
     </div>`;
   }
 
-  el.innerHTML = `${labelsHtml}<div class="card-title">${escapeHtml(card.title)}</div>${badgesHtml}`;
+  let dueDateHtml = '';
+  if (card.dueDate) {
+    const due = new Date(card.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+    const diffDays = Math.ceil((dueDay - today) / (1000 * 60 * 60 * 24));
+    let dueClass = 'due-future';
+    let dueText = formatDate(card.dueDate);
+    if (diffDays < 0) { dueClass = 'due-overdue'; dueText = '已过期'; }
+    else if (diffDays === 0) { dueClass = 'due-today'; dueText = '今天到期'; }
+    else if (diffDays === 1) { dueClass = 'due-tomorrow'; dueText = '明天到期'; }
+    dueDateHtml = `<span class="card-due ${dueClass}">${dueText}</span>`;
+  }
+
+  el.innerHTML = `${labelsHtml}<div class="card-title">${escapeHtml(card.title)}</div>${dueDateHtml}${badgesHtml}`;
   attachCardEvents(el, card, listId);
   return el;
 }
@@ -1379,6 +2205,9 @@ function endCardDrag(e) {
   const domIndex = cardsInNew.indexOf(cardEl);
   newList.cards.splice(domIndex, 0, cardData);
 
+  // Mark card as completed if moved to a "done" list
+  markCardIfCompleted(cardData, newList.title);
+
   // Update list counts
   document.querySelectorAll('.list').forEach(l => {
     const count = l.querySelectorAll('.card').length;
@@ -1490,7 +2319,8 @@ function attachListEvents(listEl, list, listIndex) {
       const title = ta.value.trim();
       if (title) {
         list.cards.push({
-          id: uid('card'), title, description: '', labels: [], subtasks: []
+          id: uid('card'), title, description: '', labels: [], subtasks: [],
+          createdAt: new Date().toISOString(), dueDate: null, completedAt: null
         });
         saveState();
         renderBoard();
@@ -1700,6 +2530,7 @@ function openModal(cardEl, card, listId) {
   modalEl.querySelector('.modal-subtitle').textContent = `在列表「${list ? list.title : ''}」中`;
   modalEl.querySelector('.modal-list-badge').textContent = list ? `列表: ${list.title}` : '';
   modalEl.querySelector('.modal-desc').value = card.description || '';
+  document.getElementById('modal-due-date').value = card.dueDate || '';
 
   renderModalLabels(card);
   renderModalSubtasks(card);
@@ -1806,6 +2637,8 @@ function saveModalEdits() {
   const newTitle = modalEl.querySelector('.modal-title').textContent.trim();
   if (newTitle) card.title = newTitle;
   card.description = modalEl.querySelector('.modal-desc').value;
+  const dueDateInput = document.getElementById('modal-due-date');
+  card.dueDate = dueDateInput ? (dueDateInput.value || null) : null;
 
   // Update card in DOM
   const cardEl = document.querySelector(`.card[data-card-id="${card.id}"]`);
@@ -1832,6 +2665,14 @@ function attachModalEvents(card, listId) {
     if (e.target === modalOverlay) closeModal();
   };
   closeBtn.onclick = closeModal;
+
+  // Due date clear button
+  const dueClearBtn = document.getElementById('modal-due-clear');
+  if (dueClearBtn) {
+    dueClearBtn.onclick = () => {
+      document.getElementById('modal-due-date').value = '';
+    };
+  }
 
   // Title editing
   titleEl.onblur = () => {
@@ -2049,6 +2890,56 @@ function showContextMenu(x, y, items) {
    ============================================================ */
 const boardTitleEl = document.getElementById('board-title');
 
+/* ============================================================
+   View Switching
+   ============================================================ */
+let currentView = 'board';
+const viewContainers = {
+  board: document.getElementById('board'),
+  calendar: document.getElementById('calendar-view'),
+  stats: document.getElementById('stats-view'),
+};
+
+function switchView(view) {
+  if (view === currentView) return;
+  currentView = view;
+
+  // Update active button state
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+
+  // Show/hide view containers
+  Object.entries(viewContainers).forEach(([key, container]) => {
+    if (container) {
+      container.style.display = key === view ? '' : 'none';
+    }
+  });
+
+  // Hide add-list button in non-board views
+  const addListBtn = document.getElementById('add-list-btn');
+  if (addListBtn) {
+    addListBtn.style.display = view === 'board' ? '' : 'none';
+  }
+
+  // Render stats view when switching to stats
+  if (view === 'stats') {
+    renderStatsView();
+  }
+
+  // Render calendar view when switching to calendar
+  if (view === 'calendar') {
+    renderCalendarView();
+  }
+}
+
+// Attach view switcher click events
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    switchView(btn.dataset.view);
+  });
+});
+
 /* Add list button */
 document.getElementById('add-list-btn').addEventListener('click', () => {
   const placeholder = boardEl.querySelector('.add-list-placeholder');
@@ -2096,6 +2987,691 @@ document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 })();
 
 /* ============================================================
+   Stats View
+   ============================================================ */
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function getCssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function renderStatsView() {
+  const allCards = [];
+  state.lists.forEach(list => {
+    (list.cards || []).forEach(card => {
+      allCards.push({ ...card, listTitle: list.title });
+    });
+  });
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const totalCards = allCards.length;
+  const weeklyCompleted = allCards.filter(c => c.completedAt && new Date(c.completedAt) >= weekAgo).length;
+  const overdue = allCards.filter(c => c.dueDate && new Date(c.dueDate) < now).length;
+  const totalLabels = allCards.reduce((sum, c) => sum + (c.labels || []).length, 0);
+
+  document.getElementById('stat-total').textContent = totalCards;
+  document.getElementById('stat-weekly').textContent = weeklyCompleted;
+  document.getElementById('stat-overdue').textContent = overdue;
+  document.getElementById('stat-labels').textContent = totalLabels;
+
+  drawLabelPieChart(allCards);
+  drawListHealthChart();
+  drawCompletionTrend(allCards);
+  drawListCompareChart();
+}
+
+function drawLabelPieChart(allCards) {
+  const canvas = document.getElementById('chart-labels');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 300, h = 300;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const labelCounts = {};
+  allCards.forEach(card => {
+    (card.labels || []).forEach(label => {
+      const key = label.color || 'blue';
+      labelCounts[key] = (labelCounts[key] || 0) + 1;
+    });
+  });
+
+  const entries = Object.entries(labelCounts);
+  const total = entries.reduce((s, [, c]) => s + c, 0);
+  const cx = w / 2, cy = h / 2;
+  const outerR = Math.min(w, h) / 2 - 24;
+  const innerR = outerR * 0.52;
+
+  if (total === 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+    ctx.strokeStyle = getCssVar('--border-overlay');
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('暂无标签数据', cx, cy);
+    return;
+  }
+
+  let startAngle = -Math.PI / 2;
+  entries.forEach(([color, count]) => {
+    const c = LABEL_COLORS[color] || LABEL_COLORS.blue;
+    const sliceAngle = (count / total) * Math.PI * 2;
+
+    // Draw slice
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, startAngle, startAngle + sliceAngle);
+    ctx.arc(cx, cy, innerR, startAngle + sliceAngle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = c.bg;
+    ctx.fill();
+    ctx.strokeStyle = getCssVar('--card-bg');
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw label
+    const midAngle = startAngle + sliceAngle / 2;
+    const labelR = outerR + 22;
+    const lx = cx + Math.cos(midAngle) * labelR;
+    const ly = cy + Math.sin(midAngle) * labelR;
+    const pct = Math.round((count / total) * 100);
+    ctx.fillStyle = getCssVar('--text');
+    ctx.font = 'bold 11px -apple-system, sans-serif';
+    ctx.textAlign = (midAngle > Math.PI * 0.5 || midAngle < -Math.PI * 0.5) ? 'right' : 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(c.name + ' ' + pct + '%', lx, ly);
+
+    startAngle += sliceAngle;
+  });
+
+  // Center text
+  ctx.fillStyle = getCssVar('--text');
+  ctx.font = 'bold 14px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total + ' 个', cx, cy);
+}
+
+function drawListHealthChart() {
+  const canvas = document.getElementById('chart-lists');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 400, h = 300;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const lists = state.lists;
+  if (lists.length === 0) {
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('暂无列表数据', w / 2, h / 2);
+    return;
+  }
+
+  const pad = { top: 24, right: 24, bottom: 44, left: 24 };
+  const chartW = w - pad.left - pad.right;
+  const chartH = h - pad.top - pad.bottom;
+  const maxCards = Math.max(...lists.map(l => l.cards.length), 1);
+  const barW = Math.min(48, (chartW / lists.length) * 0.6);
+  const gap = (chartW - barW * lists.length) / (lists.length + 1);
+  const yScale = chartH / maxCards;
+
+  // Axes
+  ctx.strokeStyle = getCssVar('--border-overlay');
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top);
+  ctx.lineTo(pad.left, h - pad.bottom);
+  ctx.lineTo(w - pad.right, h - pad.bottom);
+  ctx.stroke();
+
+  // Y gridlines
+  ctx.strokeStyle = getCssVar('--border-overlay');
+  ctx.globalAlpha = 0.25;
+  for (let i = 1; i <= maxCards; i++) {
+    const y = h - pad.bottom - i * yScale;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(i, pad.left - 6, y + 4);
+  }
+  ctx.globalAlpha = 1;
+
+  lists.forEach((list, i) => {
+    const x = pad.left + gap + i * (barW + gap);
+    const barH = list.cards.length * yScale;
+    const y = h - pad.bottom - barH;
+
+    const grad = ctx.createLinearGradient(x, y, x, h - pad.bottom);
+    grad.addColorStop(0, '#3b82f6');
+    grad.addColorStop(1, '#60a5fa');
+    ctx.fillStyle = grad;
+    roundRect(ctx, x, y, barW, barH, 5);
+    ctx.fill();
+
+    // Count
+    ctx.fillStyle = getCssVar('--text');
+    ctx.font = 'bold 11px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(list.cards.length, x + barW / 2, y - 10);
+
+    // Label
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    const label = list.title.length > 5 ? list.title.slice(0, 5) + '..' : list.title;
+    ctx.fillText(label, x + barW / 2, h - pad.bottom + 18);
+  });
+}
+
+function drawCompletionTrend(allCards) {
+  const canvas = document.getElementById('chart-trend');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 700, h = 250;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const pad = { top: 16, right: 20, bottom: 36, left: 44 };
+  const chartW = w - pad.left - pad.right;
+  const chartH = h - pad.top - pad.bottom;
+
+  const now = new Date();
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    days.push(d);
+  }
+
+  const dailyCounts = days.map(day => {
+    const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+    const dayEnd = new Date(dayStart.getTime() + 86400000);
+    return allCards.filter(c => {
+      if (!c.completedAt) return false;
+      const compDate = new Date(c.completedAt);
+      return compDate >= dayStart && compDate < dayEnd;
+    }).length;
+  });
+
+  const maxCount = Math.max(...dailyCounts, 1);
+  const xStep = chartW / (days.length - 1);
+  const yScale = chartH / maxCount;
+
+  // Axes
+  ctx.strokeStyle = getCssVar('--border-overlay');
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top);
+  ctx.lineTo(pad.left, h - pad.bottom);
+  ctx.lineTo(w - pad.right, h - pad.bottom);
+  ctx.stroke();
+
+  // Y gridlines
+  ctx.strokeStyle = getCssVar('--border-overlay');
+  ctx.globalAlpha = 0.25;
+  for (let i = 0; i <= maxCount; i++) {
+    const y = h - pad.bottom - i * yScale;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(i, pad.left - 8, y + 4);
+  }
+  ctx.globalAlpha = 1;
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(pad.left, h - pad.bottom);
+  dailyCounts.forEach((count, i) => {
+    ctx.lineTo(pad.left + i * xStep, h - pad.bottom - count * yScale);
+  });
+  ctx.lineTo(pad.left + (days.length - 1) * xStep, h - pad.bottom);
+  ctx.closePath();
+  const areaGrad = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
+  areaGrad.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+  areaGrad.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+  ctx.fillStyle = areaGrad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  dailyCounts.forEach((count, i) => {
+    const x = pad.left + i * xStep;
+    const y = h - pad.bottom - count * yScale;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots
+  dailyCounts.forEach((count, i) => {
+    if (count > 0) {
+      const x = pad.left + i * xStep;
+      const y = h - pad.bottom - count * yScale;
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#3b82f6';
+      ctx.fill();
+      ctx.strokeStyle = getCssVar('--card-bg');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  });
+
+  // X labels
+  for (let i = 0; i < days.length; i += 5) {
+    const x = pad.left + i * xStep;
+    const d = days[i];
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText((d.getMonth() + 1) + '/' + d.getDate(), x, h - pad.bottom + 16);
+  }
+}
+
+function drawListCompareChart() {
+  const canvas = document.getElementById('chart-list-compare');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 700, h = 250;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const lists = state.lists;
+  const pad = { top: 10, right: 60, bottom: 10, left: 120 };
+  const chartW = w - pad.left - pad.right;
+  const chartH = h - pad.top - pad.bottom;
+  const barH = Math.min(32, (chartH / lists.length) - 10);
+  const gap = 10;
+  const totalH = lists.length * (barH + gap) - gap;
+  const startY = pad.top + (chartH - totalH) / 2;
+
+  if (lists.length === 0) {
+    ctx.fillStyle = getCssVar('--text-dim');
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('暂无列表数据', w / 2, h / 2);
+    return;
+  }
+
+  const maxCards = Math.max(...lists.map(l => l.cards.length), 1);
+  const xScale = chartW / maxCards;
+
+  lists.forEach((list, i) => {
+    const y = startY + i * (barH + gap);
+    const bw = Math.max(list.cards.length * xScale, list.cards.length > 0 ? 4 : 0);
+
+    // Label
+    ctx.fillStyle = getCssVar('--text');
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(list.title, pad.left - 12, y + barH / 2);
+
+    // Bar
+    if (list.cards.length > 0) {
+      const grad = ctx.createLinearGradient(pad.left, 0, pad.left + chartW, 0);
+      grad.addColorStop(0, '#3b82f6');
+      grad.addColorStop(1, '#60a5fa');
+      ctx.fillStyle = grad;
+      roundRect(ctx, pad.left, y, bw, barH, 5);
+      ctx.fill();
+    }
+
+    // Count
+    ctx.fillStyle = getCssVar('--text');
+    ctx.font = 'bold 12px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(list.cards.length, pad.left + bw + 10, y + barH / 2);
+  });
+}
+
+/* ============================================================
+   Calendar View
+   ============================================================ */
+let calYear, calMonth, calWeekStart, calViewMode = 'month';
+
+function getAllCardsWithDueDate() {
+  const result = [];
+  state.lists.forEach(list => {
+    (list.cards || []).forEach(card => {
+      if (card.dueDate) {
+        result.push({ ...card, listTitle: list.title, listId: list.id });
+      }
+    });
+  });
+  return result;
+}
+
+function getCardsByDate(year, month, day) {
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return getAllCardsWithDueDate().filter(card => {
+    if (!card.dueDate) return false;
+    return card.dueDate === dateStr;
+  });
+}
+
+function renderCalendarView() {
+  const titleEl = document.getElementById('cal-month-title');
+  const gridEl = document.getElementById('cal-grid');
+
+  if (calViewMode === 'month') {
+    const now = new Date();
+    if (calYear === undefined) calYear = now.getFullYear();
+    if (calMonth === undefined) calMonth = now.getMonth();
+    titleEl.textContent = `${calYear}年 ${calMonth + 1}月`;
+    renderMonthView(gridEl);
+  } else {
+    const now = new Date();
+    if (calWeekStart === undefined) {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayOfWeek = today.getDay();
+      calWeekStart = new Date(today.getTime() - dayOfWeek * 86400000);
+    }
+    const weekEnd = new Date(calWeekStart.getTime() + 6 * 86400000);
+    const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    titleEl.textContent = `${calWeekStart.getFullYear()}年 ${monthNames[calWeekStart.getMonth()]} ${calWeekStart.getDate()}日 - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}日`;
+    renderWeekView(gridEl);
+  }
+}
+
+function renderMonthView(gridEl) {
+  const allCards = getAllCardsWithDueDate();
+  const firstDay = new Date(calYear, calMonth, 1);
+  const startDayOfWeek = firstDay.getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let html = '';
+  const totalCells = 42;
+
+  for (let i = 0; i < totalCells; i++) {
+    let day, month, year, isOtherMonth = false;
+
+    if (i < startDayOfWeek) {
+      day = daysInPrevMonth - startDayOfWeek + i + 1;
+      month = calMonth - 1;
+      year = calYear;
+      if (month < 0) { month = 11; year = calYear - 1; }
+      isOtherMonth = true;
+    } else if (i - startDayOfWeek >= daysInMonth) {
+      day = i - startDayOfWeek - daysInMonth + 1;
+      month = calMonth + 1;
+      year = calYear;
+      if (month > 11) { month = 0; year = calYear + 1; }
+      isOtherMonth = true;
+    } else {
+      day = i - startDayOfWeek + 1;
+      month = calMonth;
+      year = calYear;
+    }
+
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const isToday = year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
+
+    const cardsWithDue = allCards.filter(card => card.dueDate === dateStr);
+
+    html += renderDayCell(day, isOtherMonth, isToday, cardsWithDue, year, month);
+  }
+
+  gridEl.innerHTML = html;
+  gridEl.className = 'cal-grid';
+
+  attachDayCellEvents();
+}
+
+function renderDayCell(day, isOtherMonth, isToday, cardsWithDue, year, month) {
+  let cls = 'cal-day';
+  if (isOtherMonth) cls += ' other-month';
+  if (isToday) cls += ' today';
+
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  let dotsHtml = '';
+  if (cardsWithDue.length > 0) {
+    const maxDots = 3;
+    dotsHtml = '<div class="cal-day-dots">';
+    for (let i = 0; i < Math.min(cardsWithDue.length, maxDots); i++) {
+      const card = cardsWithDue[i];
+      const labelColor = card.labels && card.labels.length > 0
+        ? (LABEL_COLORS[card.labels[0].color] || LABEL_COLORS.blue).bg
+        : '#3b82f6';
+      dotsHtml += `<span class="cal-day-dot" style="background:${labelColor}"></span>`;
+    }
+    if (cardsWithDue.length > maxDots) {
+      dotsHtml += `<span class="cal-day-more">+${cardsWithDue.length - maxDots}</span>`;
+    }
+    dotsHtml += '</div>';
+  }
+
+  return `<div class="${cls}" data-date="${dateStr}" data-has-cards="${cardsWithDue.length > 0 ? '1' : '0'}">
+    <div class="cal-day-header">${day}</div>
+    ${dotsHtml}
+  </div>`;
+}
+
+function attachDayCellEvents() {
+  document.querySelectorAll('#cal-grid .cal-day[data-has-cards="1"]').forEach(cell => {
+    cell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dateStr = cell.dataset.date;
+      openDayPopup(dateStr);
+    });
+  });
+}
+
+function openDayPopup(dateStr) {
+  const popup = document.getElementById('cal-day-popup');
+  const dateEl = document.getElementById('cal-popup-date');
+  const cardsEl = document.getElementById('cal-popup-cards');
+
+  const [y, m, d] = dateStr.split('-').map(Number);
+  dateEl.textContent = `${y}年${m}月${d}日`;
+
+  const cards = getCardsByDate(y, m - 1, d);
+  cardsEl.innerHTML = cards.length === 0
+    ? '<div style="color:var(--text-faint);font-size:13px;padding:8px 0">暂无卡片</div>'
+    : cards.map(card => {
+        const labelColor = card.labels && card.labels.length > 0
+          ? (LABEL_COLORS[card.labels[0].color] || LABEL_COLORS.blue).bg
+          : '#3b82f6';
+        return `<div class="cal-popup-card" data-card-id="${card.id}">
+          <div class="cal-popup-card-title">${escapeHtml(card.title)}</div>
+          <div class="cal-popup-card-list">${escapeHtml(card.listTitle)}</div>
+        </div>`;
+      }).join('');
+
+  popup.style.display = 'flex';
+
+  // Attach card click events
+  cardsEl.querySelectorAll('.cal-popup-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const cardId = el.dataset.cardId;
+      openCardById(cardId);
+      popup.style.display = 'none';
+    });
+  });
+
+  // Close button
+  popup.querySelector('.cal-popup-close').onclick = () => {
+    popup.style.display = 'none';
+  };
+
+  // Close on click outside
+  const closeOnOutside = (e) => {
+    if (!popup.contains(e.target) && !e.target.closest('.cal-day')) {
+      popup.style.display = 'none';
+      document.removeEventListener('click', closeOnOutside);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', closeOnOutside), 0);
+}
+
+function openCardById(cardId) {
+  switchView('board');
+  // Small delay to let board render
+  setTimeout(() => {
+    const cardEl = document.querySelector(`.card[data-card-id="${cardId}"]`);
+    if (cardEl) {
+      const list = state.lists.find(l => l.cards.some(c => c.id === cardId));
+      const card = list ? list.cards.find(c => c.id === cardId) : null;
+      if (card && list) {
+        openModal(cardEl, card, list.id);
+      }
+    }
+  }, 200);
+}
+
+function renderWeekView(gridEl) {
+  const allCards = getAllCardsWithDueDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const weekDayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+  let html = '<div class="week-container">';
+
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(calWeekStart.getTime() + i * 86400000);
+    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    const isToday = day.getTime() === today.getTime();
+    const cardsOnDay = allCards.filter(card => card.dueDate === dateStr);
+
+    html += `<div class="week-day${isToday ? ' today' : ''}">
+      <div class="week-day-header">
+        <span class="week-day-date">${day.getMonth() + 1}/${day.getDate()}</span>
+        <span class="week-day-label">${weekDayNames[day.getDay()]}</span>
+        <span class="week-day-count">${cardsOnDay.length} 张卡片</span>
+      </div>`;
+
+    if (cardsOnDay.length === 0) {
+      html += '<div style="color:var(--text-faint);font-size:12px;padding:4px 0">暂无到期卡片</div>';
+    } else {
+      cardsOnDay.forEach(card => {
+        const labelColor = card.labels && card.labels.length > 0
+          ? (LABEL_COLORS[card.labels[0].color] || LABEL_COLORS.blue).bg
+          : '#3b82f6';
+        html += `<div class="week-card" data-card-id="${card.id}">
+          <span class="week-card-dot" style="background:${labelColor}"></span>
+          <div class="week-card-info">
+            <div class="week-card-title">${escapeHtml(card.title)}</div>
+            <div class="week-card-list">${escapeHtml(card.listTitle)}</div>
+          </div>
+        </div>`;
+      });
+    }
+
+    html += '</div>';
+  }
+
+  html += '</div>';
+  gridEl.innerHTML = html;
+  gridEl.className = '';
+
+  // Attach card click events
+  gridEl.querySelectorAll('.week-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const cardId = el.dataset.cardId;
+      openCardById(cardId);
+    });
+  });
+}
+
+// Calendar navigation events
+document.getElementById('cal-prev-month').addEventListener('click', () => {
+  if (calViewMode === 'month') {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+  } else {
+    calWeekStart = new Date(calWeekStart.getTime() - 7 * 86400000);
+  }
+  renderCalendarView();
+});
+
+document.getElementById('cal-next-month').addEventListener('click', () => {
+  if (calViewMode === 'month') {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+  } else {
+    calWeekStart = new Date(calWeekStart.getTime() + 7 * 86400000);
+  }
+  renderCalendarView();
+});
+
+document.getElementById('cal-today-btn').addEventListener('click', () => {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayOfWeek = todayDate.getDay();
+  calWeekStart = new Date(todayDate.getTime() - dayOfWeek * 86400000);
+  renderCalendarView();
+});
+
+// Month/Week toggle
+document.querySelectorAll('.cal-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const view = btn.dataset.calview;
+    calViewMode = view;
+    document.querySelectorAll('.cal-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.calview === view));
+    document.querySelector('.cal-weekdays').style.display = view === 'month' ? '' : 'none';
+    renderCalendarView();
+  });
+});
+
+/* ============================================================
    Init
    ============================================================ */
 loadState();
@@ -2117,6 +3693,373 @@ window.addEventListener('resize', () => {
     modalEl.style.transition = 'none';
     modalEl.style.transform = 'translate(-50%, -50%) scale(1)';
   }
+});
+
+/* ============================================================
+   Notification System
+   ============================================================ */
+
+// 请求通知权限
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// 每 30 分钟检查到期卡片
+function checkDueNotifications() {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const today = new Date().toISOString().split('T')[0];
+  state.lists.forEach(list => {
+    list.cards.forEach(card => {
+      if (card.dueDate === today && !card.completedAt) {
+        new Notification('\u{1f4cb} 今日到期提醒', { body: `"${card.title}" 今天到期！` });
+      }
+    });
+  });
+}
+setInterval(checkDueNotifications, 30 * 60 * 1000);
+setTimeout(checkDueNotifications, 5000);
+
+/* ============================================================
+   AI Summary Engine
+   ============================================================ */
+
+function getAllCardsWithContext() {
+  const cards = [];
+  state.lists.forEach(list => {
+    (list.cards || []).forEach(card => {
+      cards.push({
+        title: card.title,
+        description: card.description || '',
+        listTitle: list.title,
+        labels: (card.labels || []).map(l => {
+          const c = LABEL_COLORS[l.color] || {};
+          return (l.text || c.name || l.color);
+        }).join(', '),
+        subtaskTotal: (card.subtasks || []).length,
+        subtaskDone: (card.subtasks || []).filter(s => s.done).length,
+        dueDate: card.dueDate,
+        createdAt: card.createdAt,
+        completedAt: card.completedAt,
+      });
+    });
+  });
+  return cards;
+}
+
+function generateRuleSummary() {
+  const cards = getAllCardsWithContext();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  // 即将到期 (未来3天内)
+  const threeDaysLater = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const upcoming = cards.filter(c => {
+    if (!c.dueDate || c.completedAt) return false;
+    const due = new Date(c.dueDate);
+    return due >= today && due <= threeDaysLater;
+  });
+
+  // 已过期
+  const overdue = cards.filter(c => {
+    if (!c.dueDate || c.completedAt) return false;
+    const due = new Date(c.dueDate);
+    return due < today;
+  });
+
+  // 长期停滞 (>7天未完成且未更新)
+  const stagnant = cards.filter(c => {
+    if (c.completedAt) return false;
+    const created = new Date(c.createdAt);
+    return created < sevenDaysAgo;
+  });
+
+  const totalCards = cards.length;
+  const completedCards = cards.filter(c => c.completedAt).length;
+  const activeCards = cards.filter(c => !c.completedAt).length;
+
+  let html = '';
+
+  // 总览
+  html += `<h4>看板总览</h4>`;
+  html += `<p>总计 <strong>${totalCards}</strong> 张卡片，已完成 <strong class="ai-success">${completedCards}</strong> 张，进行中 <strong>${activeCards}</strong> 张。</p>`;
+
+  if (overdue.length > 0) {
+    html += `<h4><span class="ai-danger">已过期 (${overdue.length})</span></h4><ul>`;
+    overdue.forEach(c => {
+      html += `<li>${escapeHtml(c.title)} <span class="ai-danger">[${c.listTitle}]</span></li>`;
+    });
+    html += '</ul>';
+  }
+
+  if (upcoming.length > 0) {
+    html += `<h4><span class="ai-warning">即将到期 (${upcoming.length})</span></h4><ul>`;
+    upcoming.forEach(c => {
+      html += `<li>${escapeHtml(c.title)} <span class="ai-warning">[${formatDate(c.dueDate)}]</span></li>`;
+    });
+    html += '</ul>';
+  }
+
+  if (stagnant.length > 0) {
+    html += `<h4>长期停滞 >7天 (${stagnant.length})</h4><ul>`;
+    stagnant.forEach(c => {
+      html += `<li>${escapeHtml(c.title)} <span style="color:var(--text-faint)">[${c.listTitle}]</span></li>`;
+    });
+    html += '</ul>';
+  }
+
+  if (overdue.length === 0 && upcoming.length === 0) {
+    html += `<p class="ai-success">所有事项正常，没有过期或即将到期的卡片。</p>`;
+  }
+
+  return html;
+}
+
+function generateWeeklyReport() {
+  const cards = getAllCardsWithContext();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  // 本周完成
+  const weeklyCompleted = cards.filter(c => {
+    if (!c.completedAt) return false;
+    const compDate = new Date(c.completedAt);
+    return compDate >= weekAgo;
+  });
+
+  // 本周新增
+  const weeklyNew = cards.filter(c => {
+    if (!c.createdAt) return false;
+    const created = new Date(c.createdAt);
+    return created >= weekAgo;
+  });
+
+  // 进行中
+  const inProgress = cards.filter(c => !c.completedAt);
+
+  const weekStart = new Date(weekAgo);
+  const weekStartStr = (weekStart.getMonth() + 1) + '月' + weekStart.getDate() + '日';
+  const todayStr = (today.getMonth() + 1) + '月' + today.getDate() + '日';
+
+  let md = '';
+  md += `# 周报 (${weekStartStr} - ${todayStr})\n\n`;
+
+  md += `## 概览\n`;
+  md += `- 本周完成：${weeklyCompleted.length} 张\n`;
+  md += `- 本周新增：${weeklyNew.length} 张\n`;
+  md += `- 进行中：${inProgress.length} 张\n\n`;
+
+  if (weeklyCompleted.length > 0) {
+    md += `## 本周完成\n`;
+    weeklyCompleted.forEach(c => {
+      md += `- [${c.listTitle}] ${c.title}\n`;
+    });
+    md += '\n';
+  }
+
+  if (weeklyNew.length > 0) {
+    md += `## 本周新增\n`;
+    weeklyNew.forEach(c => {
+      md += `- [${c.listTitle}] ${c.title}\n`;
+    });
+    md += '\n';
+  }
+
+  if (inProgress.length > 0) {
+    md += `## 进行中\n`;
+    inProgress.forEach(c => {
+      const dueSuffix = c.dueDate ? ` (${formatDate(c.dueDate)}到期)` : '';
+      md += `- [${c.listTitle}] ${c.title}${dueSuffix}\n`;
+    });
+    md += '\n';
+  }
+
+  return md;
+}
+
+function generateRulePrompt() {
+  const cards = getAllCardsWithContext();
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+
+  let prompt = `当前日期：${todayStr}\n\n`;
+  prompt += '以下是看板中所有卡片的数据：\n\n';
+
+  state.lists.forEach(list => {
+    prompt += `## 列表：${list.title}\n`;
+    if (list.cards.length === 0) {
+      prompt += '(空)\n\n';
+    } else {
+      list.cards.forEach(card => {
+        prompt += `- 标题：${card.title}\n`;
+        if (card.description) prompt += `  描述：${card.description}\n`;
+        if (card.labels && card.labels.length) {
+          const labelTexts = card.labels.map(l => l.text || (LABEL_COLORS[l.color] ? LABEL_COLORS[l.color].name : l.color)).join(', ');
+          prompt += `  标签：${labelTexts}\n`;
+        }
+        if (card.dueDate) prompt += `  到期日：${card.dueDate}\n`;
+        const subtaskDone = (card.subtasks || []).filter(s => s.done).length;
+        const subtaskTotal = (card.subtasks || []).length;
+        if (subtaskTotal > 0) prompt += `  子任务：${subtaskDone}/${subtaskTotal}\n`;
+        if (card.completedAt) prompt += `  完成时间：${card.completedAt}\n`;
+        prompt += '\n';
+      });
+    }
+  });
+
+  return prompt;
+}
+
+/* ============================================================
+   AI Settings Management
+   ============================================================ */
+
+function getAIConfig() {
+  return {
+    endpoint: state.aiEndpoint || 'https://api.deepseek.com/chat/completions',
+    apiKey: state.aiApiKey || '',
+    model: state.aiModel || 'deepseek-chat',
+  };
+}
+
+function saveAIConfig(endpoint, apiKey, model) {
+  state.aiEndpoint = endpoint;
+  state.aiApiKey = apiKey;
+  state.aiModel = model;
+  saveState();
+}
+
+function openAISettings() {
+  const config = getAIConfig();
+  document.getElementById('ai-endpoint-input').value = config.endpoint;
+  document.getElementById('ai-apikey-input').value = config.apiKey;
+  document.getElementById('ai-model-input').value = config.model;
+  document.getElementById('ai-settings-modal').style.display = 'flex';
+}
+
+function closeAISettings() {
+  document.getElementById('ai-settings-modal').style.display = 'none';
+}
+
+// AI Settings button
+document.getElementById('ai-settings-btn').addEventListener('click', openAISettings);
+
+// Save button
+document.getElementById('ai-save-btn').addEventListener('click', () => {
+  const endpoint = document.getElementById('ai-endpoint-input').value.trim();
+  const apiKey = document.getElementById('ai-apikey-input').value.trim();
+  const model = document.getElementById('ai-model-input').value.trim();
+  saveAIConfig(endpoint, apiKey, model);
+  closeAISettings();
+});
+
+// Cancel button
+document.getElementById('ai-cancel-btn').addEventListener('click', closeAISettings);
+
+// Close settings modal on overlay click
+document.getElementById('ai-settings-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeAISettings();
+});
+
+/* ============================================================
+   AI API Call
+   ============================================================ */
+
+async function callAI(prompt) {
+  const config = getAIConfig();
+  if (!config.apiKey) return null;
+
+  try {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [
+          { role: 'system', content: '你是一个项目管理助手，帮助用户分析看板数据并提供简洁的摘要和建议。请用中文回复。' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`API 请求失败 (${response.status}): ${errText}`);
+    }
+
+    const data = await response.json();
+    return data.choices && data.choices[0] && data.choices[0].message
+      ? data.choices[0].message.content
+      : null;
+  } catch (e) {
+    console.error('AI API 调用失败:', e);
+    return null;
+  }
+}
+
+/* ============================================================
+   AI Summary Actions
+   ============================================================ */
+
+const aiSummaryEl = document.getElementById('ai-summary');
+const aiGenerateBtn = document.getElementById('ai-generate-btn');
+const aiWeeklyBtn = document.getElementById('ai-weekly-btn');
+
+// 生成今日摘要
+aiGenerateBtn.addEventListener('click', async () => {
+  aiGenerateBtn.disabled = true;
+  aiGenerateBtn.textContent = '生成中...';
+  aiSummaryEl.innerHTML = '<div class="ai-placeholder">正在生成摘要...</div>';
+
+  // 先使用规则引擎生成摘要
+  const ruleSummary = generateRuleSummary();
+  aiSummaryEl.innerHTML = ruleSummary;
+
+  // 如果配置了 API Key，尝试用 AI 增强
+  const config = getAIConfig();
+  if (config.apiKey) {
+    const prompt = generateRulePrompt() + '\n请根据以上看板数据，生成一份简洁的中文项目摘要，包含：\n1. 总体情况概览\n2. 需要关注的风险项（过期、即将到期等）\n3. 建议优先处理的事项\n请用 HTML 格式输出，使用 <h4> 作为小标题，<ul><li> 作为列表项。';
+    const aiResult = await callAI(prompt);
+    if (aiResult) {
+      aiSummaryEl.innerHTML = '<div style="margin-bottom:10px;font-size:11px;color:var(--text-faint);">AI 增强摘要</div>' + aiResult;
+    }
+  }
+
+  aiGenerateBtn.disabled = false;
+  aiGenerateBtn.textContent = '\u2728 生成今日摘要';
+});
+
+// 生成周报
+aiWeeklyBtn.addEventListener('click', async () => {
+  aiWeeklyBtn.disabled = true;
+  aiWeeklyBtn.textContent = '生成中...';
+
+  // 先用规则引擎生成 Markdown 周报
+  const weeklyMd = generateWeeklyReport();
+
+  // 如果配置了 API Key，尝试用 AI 润色
+  const config = getAIConfig();
+  if (config.apiKey) {
+    const prompt = generateRulePrompt() + '\n请根据以上看板数据，生成一份专业的中文项目周报，包含：\n1. 本周概览（完成数、新增数、进行中数）\n2. 本周完成事项\n3. 本周新增事项\n4. 进行中事项及进展\n5. 下周计划建议\n请用 Markdown 格式输出。';
+    const aiResult = await callAI(prompt);
+    if (aiResult) {
+      aiSummaryEl.innerHTML = '<div style="margin-bottom:10px;font-size:11px;color:var(--text-faint);">AI 润色周报</div><pre>' + escapeHtml(aiResult) + '</pre>';
+      aiWeeklyBtn.disabled = false;
+      aiWeeklyBtn.textContent = '\u{1f4cb} 生成周报';
+      return;
+    }
+  }
+
+  // 使用规则引擎的结果
+  aiSummaryEl.innerHTML = '<pre>' + escapeHtml(weeklyMd) + '</pre>';
+  aiWeeklyBtn.disabled = false;
+  aiWeeklyBtn.textContent = '\u{1f4cb} 生成周报';
 });
 </script>
 </body>
