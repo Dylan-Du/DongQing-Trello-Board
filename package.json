@@ -1,7 +1,7 @@
 {
   "name": "dongqing-trello-board",
-  "version": "1.1.1",
-  "description": "东青Trello看板 - 高颜值本地看板应用",
+  "version": "1.2.0",
+  "description": "东青Trello看板 - 高颜值本地看板应用，支持多看板、搜索筛选、归档撤销、Markdown、附件、日历拖拽改期、命令面板",
   "main": "main.js",
   "author": "DongQing"
 }

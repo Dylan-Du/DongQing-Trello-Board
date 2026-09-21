@@ -146,6 +146,7 @@ body {
   -webkit-app-region: no-drag;
 }
 #board-title {
+  display: none;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -156,6 +157,20 @@ body {
   -webkit-user-select: none;
 }
 .header-spacer { flex: 1; }
+
+#tool-btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+#tool-btn svg { width: 18px; height: 18px; color: var(--accent); transition: all 0.3s ease; }
+#tool-btn:hover { background: var(--hover-overlay-strong); border-color: var(--border-overlay-strong); transform: translateY(-1px); }
+#tool-btn:hover svg { color: var(--accent-2); }
 
 #theme-toggle {
   width: 40px; height: 40px;
@@ -247,6 +262,9 @@ body {
   overflow-y: hidden;
   height: calc(100vh - 60px);
   align-items: flex-start;
+}
+body.has-toolbar #board {
+  height: calc(100vh - 106px);
 }
 
 /* ===== List ===== */
@@ -387,21 +405,6 @@ body {
   transition: all var(--transition);
 }
 .btn-cancel:hover { background: var(--hover-overlay-strong); color: var(--text); }
-
-/* Text cancel button (for modals with text label) */
-.btn-text-cancel {
-  height: 38px;
-  padding: 0 22px;
-  background: transparent;
-  border: 1px solid var(--border-overlay);
-  color: var(--text-dim);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all var(--transition);
-}
-.btn-text-cancel:hover { background: var(--hover-overlay); color: var(--text); border-color: var(--border-overlay-strong); }
 
 /* ===== Card ===== */
 .card {
@@ -1117,6 +1120,49 @@ body {
   flex-shrink: 0;
 }
 .cal-day.other-month .cal-day-header { color: var(--text-faint); }
+.cal-day-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.cal-day-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border-overlay);
+  cursor: grab;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cal-day-chip:hover { background: var(--hover-overlay); border-color: var(--border-overlay-strong); }
+.cal-day-chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cal-day-chip-title {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-day-chip-more {
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+.cal-day-chip.dragging { visibility: hidden; }
 .cal-day-dots {
   display: flex;
   flex-wrap: wrap;
@@ -1478,11 +1524,618 @@ body {
 .ai-warning { color: #eab308; font-weight: 600; }
 .ai-danger { color: #ef4444; font-weight: 600; }
 .ai-success { color: #22c55e; font-weight: 600; }
+
+/* ============================================================
+   Board Switcher
+   ============================================================ */
+.board-switcher { position: relative; }
+.board-switcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  max-width: 260px;
+  font-family: inherit;
+}
+.board-switcher-btn:hover { background: var(--hover-overlay); border-color: var(--border-overlay-strong); }
+.board-switcher-btn svg { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; }
+.board-switcher-btn .board-switcher-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-switcher-btn .board-switcher-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  background: var(--hover-overlay);
+  border-radius: 8px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+.board-switcher-menu {
+  position: fixed;
+  z-index: 9000;
+  min-width: 280px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: var(--bg-elev);
+  border: 1px solid var(--context-border);
+  border-radius: 14px;
+  box-shadow: var(--context-shadow);
+  padding: 6px;
+  display: none;
+}
+.board-switcher-menu.active { display: block; }
+.bsm-title { padding: 8px 10px 4px; font-size: 11px; color: var(--text-faint); font-weight: 600; letter-spacing: 0.04em; }
+.bsm-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.bsm-item:hover { background: var(--hover-overlay); }
+.bsm-item.active { background: var(--hover-overlay-strong); }
+.bsm-item .bsm-icon {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: var(--accent-grad);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bsm-item .bsm-icon svg { width: 13px; height: 13px; }
+.bsm-item .bsm-name { flex: 1; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bsm-item .bsm-meta { font-size: 11px; color: var(--text-faint); flex-shrink: 0; }
+.bsm-item .bsm-action {
+  width: 24px; height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.bsm-item .bsm-action:hover { background: var(--hover-overlay-strong); color: var(--danger); }
+.bsm-new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  margin-top: 4px;
+  border: 1px dashed var(--border-overlay-strong);
+  background: transparent;
+  border-radius: 9px;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.bsm-new:hover { color: var(--accent-2); border-color: var(--accent); background: var(--surface-tint); }
+.bsm-empty { padding: 10px; font-size: 12px; color: var(--text-faint); text-align: center; }
+
+/* ===== Search & Filter Bar ===== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 8px 12px;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--header-border);
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+.search-input-wrap { position: relative; flex: 1; min-width: 160px; }
+.search-input-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  background: var(--input-bg);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text-faint); }
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--input-bg);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.filter-chip:hover { color: var(--text); background: var(--hover-overlay); }
+.filter-chip.active { background: var(--hover-overlay-strong); border-color: var(--accent); color: var(--accent-2); }
+.filter-chip svg { width: 13px; height: 13px; }
+.search-count { font-size: 12px; color: var(--text-faint); white-space: nowrap; flex-shrink: 0; }
+.search-clear {
+  width: 26px; height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 17px;
+  border-radius: 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: none;
+  transition: all 0.15s;
+}
+.search-clear:hover { background: var(--hover-overlay-strong); color: var(--text); }
+.search-clear.visible { display: block; }
+.filter-menu { min-width: 220px; }
+.filter-menu .fm-title { padding: 8px 10px 4px; font-size: 11px; color: var(--text-faint); font-weight: 600; }
+.filter-menu .fm-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 10px; }
+.fm-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-overlay);
+  color: var(--text-dim);
+  background: transparent;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.fm-chip:hover { border-color: var(--border-overlay-strong); color: var(--text); }
+.fm-chip.active { border-color: var(--accent); color: var(--accent-2); background: var(--hover-overlay); }
+.fm-chip.fm-label-dot::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 3px;
+  background: var(--dot, var(--accent));
+  margin-right: 6px;
+}
+
+/* ===== Markdown Preview ===== */
+.md-preview {
+  min-height: 80px;
+  padding: 10px 12px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  overflow-wrap: break-word;
+}
+.md-preview p { margin: 0 0 8px; }
+.md-preview p:last-child { margin-bottom: 0; }
+.md-preview h1, .md-preview h2, .md-preview h3, .md-preview h4 { margin: 10px 0 6px; line-height: 1.3; }
+.md-preview h1 { font-size: 17px; }
+.md-preview h2 { font-size: 15px; }
+.md-preview h3 { font-size: 14px; }
+.md-preview h4 { font-size: 13px; }
+.md-preview ul, .md-preview ol { margin: 0 0 8px; padding-left: 22px; }
+.md-preview li { margin: 2px 0; }
+.md-preview code {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-overlay);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+.md-preview pre {
+  background: var(--input-bg);
+  border: 1px solid var(--border-overlay);
+  padding: 10px 12px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 0 0 8px;
+}
+.md-preview pre code { background: none; border: none; padding: 0; }
+.md-preview blockquote {
+  margin: 0 0 8px;
+  padding: 4px 12px;
+  border-left: 3px solid var(--accent);
+  color: var(--text-dim);
+  background: var(--surface-tint);
+  border-radius: 0 8px 8px 0;
+}
+.md-preview a { color: var(--accent-2); }
+.md-preview hr { border: none; border-top: 1px solid var(--border-overlay-strong); margin: 10px 0; }
+.md-preview table { border-collapse: collapse; margin: 0 0 8px; font-size: 12px; }
+.md-preview th, .md-preview td { border: 1px solid var(--border-overlay-strong); padding: 4px 10px; }
+.md-preview strong { font-weight: 700; }
+.md-preview img { max-width: 100%; border-radius: 8px; }
+.md-empty { color: var(--text-faint); font-style: italic; }
+.md-toggle-btn.active { background: var(--hover-overlay-strong); color: var(--accent-2); }
+.md-toggle-btn svg { width: 14px; height: 14px; }
+#modal-desc[hidden] { display: none; }
+
+/* ===== Attachments ===== */
+.attach-list { display: flex; flex-direction: column; gap: 8px; }
+.attach-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+  transition: all var(--transition);
+}
+.attach-item:hover { border-color: var(--border-overlay-strong); }
+.attach-thumb {
+  width: 52px; height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: zoom-in;
+  border: 1px solid var(--border-overlay);
+  flex-shrink: 0;
+  background: var(--input-bg);
+}
+.attach-name {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attach-size { font-size: 11px; color: var(--text-faint); flex-shrink: 0; }
+.attach-delete {
+  width: 26px; height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.attach-delete:hover { background: rgba(239,68,68,0.12); color: var(--danger); }
+.attach-add-row { display: flex; gap: 8px; margin-top: 8px; }
+.attach-add-btn {
+  flex: 1;
+  padding: 9px 10px;
+  background: transparent;
+  border: 1px dashed var(--border-overlay-strong);
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.attach-add-btn:hover { color: var(--accent-2); border-color: var(--accent); background: var(--surface-tint); }
+.attach-hint { margin-top: 6px; font-size: 11px; color: var(--text-faint); text-align: center; }
+.attach-empty { padding: 6px 2px; font-size: 12px; color: var(--text-faint); font-style: italic; }
+#lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+#lightbox.active { display: flex; }
+#lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 12px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
+
+/* ===== Calendar Drag ===== */
+.cal-day.drag-over-day { outline: 2px dashed var(--accent); outline-offset: -3px; border-radius: 14px; }
+.cal-drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 200px;
+  padding: 6px 12px;
+  background: var(--accent-grad);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 9px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.4);
+  transform: rotate(3deg);
+  opacity: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-week-card.dragging { visibility: hidden; }
+.week-day.drag-over-day, .week-card.dragging { transition: opacity 0.15s; }
+.week-day.drag-over-day { outline: 2px dashed var(--accent); outline-offset: -3px; border-radius: 14px; }
+.cal-drag-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: var(--accent-grad);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ===== Command Palette ===== */
+#palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+}
+#palette-overlay.active { display: flex; }
+#palette {
+  width: min(620px, 92vw);
+  max-height: 62vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elev);
+  border: 1px solid var(--context-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  animation: palette-in 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes palette-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+#palette-input {
+  padding: 16px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--header-border);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+#palette-input::placeholder { color: var(--text-faint); }
+#palette-list { flex: 1; overflow-y: auto; padding: 8px; }
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.palette-item.selected { background: var(--hover-overlay-strong); }
+.palette-item .pi-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--hover-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.palette-item .pi-icon svg { width: 15px; height: 15px; color: var(--accent); }
+.palette-item .pi-text { flex: 1; min-width: 0; }
+.palette-item .pi-title { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-item .pi-sub { font-size: 11px; color: var(--text-faint); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-empty { padding: 24px; text-align: center; color: var(--text-faint); font-size: 13px; }
+.palette-footer {
+  display: flex;
+  gap: 16px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--header-border);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.palette-footer b { font-weight: 600; color: var(--text-dim); }
+
+/* ===== Archive / Shortcuts Modals ===== */
+.archive-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.archive-modal.active { display: flex; }
+.archive-content {
+  width: min(640px, 94vw);
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elev);
+  border: 1px solid var(--context-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+.archive-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--header-border);
+}
+.archive-header h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.archive-header button {
+  width: 30px; height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.archive-header button:hover { background: var(--hover-overlay-strong); color: var(--text); }
+.archive-list { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.archive-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--input-bg-light);
+  border: 1px solid var(--border-overlay);
+  border-radius: 12px;
+}
+.archive-item .ai-main { flex: 1; min-width: 0; }
+.archive-item .ai-title { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.archive-item .ai-meta { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.archive-item .ai-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.archive-item button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-overlay-strong);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.archive-item button:hover { color: var(--accent-2); border-color: var(--accent); }
+.archive-item button.arc-delete:hover { color: var(--danger); border-color: var(--danger); }
+.archive-empty { padding: 32px; text-align: center; color: var(--text-faint); font-size: 13px; }
+
+/* ===== Toast / Undo ===== */
+#toast-container {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-elev);
+  border: 1px solid var(--context-border);
+  border-radius: 12px;
+  box-shadow: var(--context-shadow);
+  font-size: 13px;
+  color: var(--text);
+  pointer-events: auto;
+  animation: toast-in 0.25s cubic-bezier(0.2, 0, 0, 1);
+  max-width: 90vw;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.toast.leaving { opacity: 0; transform: translateY(8px); transition: all 0.25s; }
+.toast .toast-msg { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toast .toast-undo {
+  border: none;
+  background: var(--accent-grad);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.toast .toast-undo:hover { filter: brightness(1.1); }
+.toast .toast-undo:disabled { opacity: 0.5; cursor: default; }
+
+/* ===== Custom Background ===== */
+body.custom-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--custom-bg-image);
+  background-size: cover;
+  background-position: center;
+}
+body.custom-bg-dim::before { filter: brightness(0.55); }
+
+/* ===== Shortcuts Help ===== */
+.shortcuts-body { flex: 1; overflow-y: auto; padding: 14px 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; }
+.sc-group { padding: 8px 0; }
+.sc-group h4 { font-size: 12px; color: var(--text-faint); font-weight: 600; letter-spacing: 0.04em; margin-bottom: 8px; }
+.sc-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+.sc-row .sc-keys { display: flex; gap: 4px; }
+.sc-row kbd {
+  display: inline-block;
+  min-width: 22px;
+  text-align: center;
+  padding: 3px 7px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-overlay-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+@media (max-width: 640px) { .shortcuts-body { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <header id="header">
+  <div class="board-switcher">
+    <button id="board-switcher-btn" class="board-switcher-btn" title="切换看板">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      <span class="board-switcher-name" id="board-switcher-name">东青Trello看板</span>
+      <span class="board-switcher-count" id="board-switcher-count">0</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div id="board-switcher-menu" class="board-switcher-menu"></div>
+  </div>
   <div id="board-title">东青Trello看板</div>
   <div class="view-switcher">
     <button class="view-btn active" data-view="board" title="看板视图">
@@ -1496,12 +2149,28 @@ body {
     </button>
   </div>
   <div class="header-spacer"></div>
+  <button id="tool-btn" title="工具与数据（导出 / 导入 / 归档站 / 自定义背景）">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
   <button id="theme-toggle" title="切换主题">
     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
   </button>
   <button id="add-list-btn">+ 添加列表</button>
 </header>
+
+<div id="search-bar" class="search-bar" style="display:none;">
+  <div class="search-input-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" class="search-input" placeholder="搜索卡片标题、描述…">
+  </div>
+  <button id="filter-btn" class="filter-chip" title="按标签 / 到期日筛选">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    筛选
+  </button>
+  <span id="search-count" class="search-count"></span>
+  <button id="search-clear" class="search-clear" title="清除搜索与筛选">&times;</button>
+</div>
 
 <div id="board"></div>
 
@@ -1582,7 +2251,7 @@ body {
     <input type="text" id="ai-model-input" placeholder="deepseek-chat" class="ai-input">
     <div class="ai-settings-actions">
       <button id="ai-save-btn" class="btn-primary">保存</button>
-      <button id="ai-cancel-btn" class="btn-text-cancel">取消</button>
+      <button id="ai-cancel-btn" class="btn-cancel">取消</button>
     </div>
   </div>
 </div>
@@ -1610,10 +2279,15 @@ body {
       </div>
       <div class="modal-section">
         <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
           描述
+          <button id="md-toggle-btn" class="filter-chip md-toggle-btn" title="Markdown 预览开关" style="margin-left:auto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            预览
+          </button>
         </h3>
-        <textarea class="modal-desc" placeholder="添加更详细的描述..."></textarea>
+        <textarea class="modal-desc" id="modal-desc" placeholder="添加更详细的描述...（支持 Markdown）"></textarea>
+        <div class="md-preview" id="md-preview" hidden></div>
       </div>
       <div class="modal-section">
         <h3>
@@ -1624,6 +2298,17 @@ body {
           <input type="date" id="modal-due-date" class="modal-due-input">
           <button id="modal-due-clear" class="btn-clear-due" title="清除到期日">&times;</button>
         </div>
+      </div>
+      <div class="modal-section">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          附件
+        </h3>
+        <div class="attach-list" id="attach-list"></div>
+        <div class="attach-add-row">
+          <button id="attach-add-btn" class="attach-add-btn">📎 添加图片附件</button>
+        </div>
+        <div class="attach-hint">在描述框中可直接粘贴（⌘V）截图作为附件</div>
       </div>
       <div class="modal-section">
         <h3>
@@ -1653,6 +2338,53 @@ body {
 
 <div class="context-menu" id="context-menu"></div>
 
+<!-- 图片灯箱 -->
+<div id="lightbox"><img alt="附件预览"></div>
+
+<!-- Toast 通知 -->
+<div id="toast-container"></div>
+
+<!-- 命令面板 -->
+<div id="palette-overlay">
+  <div id="palette">
+    <input type="text" id="palette-input" placeholder="搜索卡片，或输入命令：> 切换主题、> 归档站…" autocomplete="off">
+    <div id="palette-list"></div>
+    <div class="palette-footer">
+      <span><b>↑↓</b> 选择</span>
+      <span><b>Enter</b> 打开</span>
+      <span><b>Esc</b> 关闭</span>
+      <span style="margin-left:auto">输入 &gt; 执行命令</span>
+    </div>
+  </div>
+</div>
+
+<!-- 归档站 -->
+<div id="archive-modal" class="archive-modal">
+  <div class="archive-content">
+    <div class="archive-header">
+      <h3>📦 归档站</h3>
+      <button id="archive-close">&times;</button>
+    </div>
+    <div class="archive-list" id="archive-list"></div>
+  </div>
+</div>
+
+<!-- 快捷键帮助 -->
+<div id="shortcuts-modal" class="archive-modal">
+  <div class="archive-content">
+    <div class="archive-header">
+      <h3>⌨️ 键盘快捷键</h3>
+      <button id="shortcuts-close">&times;</button>
+    </div>
+    <div class="shortcuts-body" id="shortcuts-body"></div>
+  </div>
+</div>
+
+<!-- 隐藏文件选择器 -->
+<input type="file" id="import-file-input" accept=".json,application/json" style="display:none">
+<input type="file" id="bg-file-input" accept="image/*" style="display:none">
+<input type="file" id="attach-file-input" accept="image/*" multiple style="display:none">
+
 <script>
 /* ============================================================
    State & Persistence
@@ -1670,12 +2402,67 @@ const LABEL_COLORS = {
 };
 
 let state = {
+  version: 2,
+  boards: [],
+  activeBoardId: null,
   boardTitle: '东青Trello看板',
-  lists: []
+  lists: [],  // active board alias (for legacy references)
+  archive: [],
+  bgImage: null,
+  bgDim: true,
 };
 
 let uidCounter = 0;
 function uid(prefix) { return `${prefix}-${Date.now()}-${++uidCounter}`; }
+
+function migrateCard(card) {
+  if (card.dueDate === undefined) card.dueDate = null;
+  if (card.createdAt === undefined) card.createdAt = new Date().toISOString();
+  if (card.completedAt === undefined) card.completedAt = null;
+  if (!Array.isArray(card.labels)) card.labels = [];
+  if (!Array.isArray(card.subtasks)) card.subtasks = [];
+  if (!Array.isArray(card.attachments)) card.attachments = [];
+}
+
+function makeSampleLists() {
+  return [
+    {
+      id: uid('list'), title: '待办',
+      cards: [
+        { id: uid('card'), title: '设计登录页面 UI 原型', description: '需要完成登录、注册、忘记密码三个页面的高保真设计稿，包含明暗主题适配。', labels: [{color:'purple',text:'设计'}], subtasks: [
+          { id: uid('sub'), text: '绘制线框图', done: true },
+          { id: uid('sub'), text: '完成高保真稿', done: false },
+          { id: uid('sub'), text: '明暗主题适配', done: false },
+        ], attachments: [] },
+        { id: uid('card'), title: '编写 API 接口文档', description: '', labels: [{color:'blue',text:'文档'}], subtasks: [
+          { id: uid('sub'), text: '用户认证接口', done: true },
+          { id: uid('sub'), text: '数据 CRUD 接口', done: false },
+        ], attachments: [] },
+      ]
+    },
+    {
+      id: uid('list'), title: '进行中',
+      cards: [
+        { id: uid('card'), title: '实现拖拽排序功能', description: '使用原生 Pointer Events 实现 FLIP 动画驱动的拖拽排序，支持跨列表移动。', labels: [{color:'green',text:'开发'},{color:'orange',text:'紧急'}], subtasks: [
+          { id: uid('sub'), text: '卡片拖拽', done: true },
+          { id: uid('sub'), text: '列表拖拽', done: true },
+          { id: uid('sub'), text: '边缘自动滚动', done: false },
+        ], attachments: [] },
+        { id: uid('card'), title: '数据库性能优化', description: '针对慢查询进行索引优化', labels: [{color:'green',text:'开发'}], subtasks: [], attachments: [] },
+      ]
+    },
+    {
+      id: uid('list'), title: '已完成',
+      cards: [
+        { id: uid('card'), title: '项目环境搭建', description: '', labels: [{color:'cyan',text:'运维'}], subtasks: [
+          { id: uid('sub'), text: '配置 CI/CD', done: true },
+          { id: uid('sub'), text: '部署开发服务器', done: true },
+        ], attachments: [] },
+        { id: uid('card'), title: '需求评审会议', description: '与产品团队完成第一轮需求评审', labels: [{color:'red',text:'会议'}], subtasks: [], attachments: [] },
+      ]
+    },
+  ];
+}
 
 function loadState() {
   try {
@@ -1683,72 +2470,929 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.lists) {
+        // v1 format: single board of lists -> migrate to multi-board
+        const board = {
+          id: uid('board'),
+          title: parsed.boardTitle || '东青Trello看板',
+          createdAt: new Date().toISOString(),
+          lists: parsed.lists,
+        };
+        state = {
+          version: 2,
+          boards: [board],
+          activeBoardId: board.id,
+          archive: Array.isArray(parsed.archive) ? parsed.archive : [],
+          bgImage: parsed.bgImage || null,
+          bgDim: parsed.bgDim !== false,
+          // preserve AI config from v1
+          aiApiKey: parsed.aiApiKey || '',
+          aiEndpoint: parsed.aiEndpoint || 'https://api.deepseek.com/chat/completions',
+          aiModel: parsed.aiModel || 'deepseek-chat',
+        };
+        normalizeState();
+        saveState();  // persist migrated v2 format immediately
+        return;
+      }
+      if (parsed && Array.isArray(parsed.boards) && parsed.boards.length) {
         state = parsed;
-        // Migrate cards: add missing fields
-        state.lists.forEach(list => {
-          (list.cards || []).forEach(card => {
-            if (card.dueDate === undefined) card.dueDate = null;
-            if (card.createdAt === undefined) card.createdAt = new Date().toISOString();
-            if (card.completedAt === undefined) card.completedAt = null;
-          });
-        });
+        normalizeState();
         return;
       }
     }
   } catch(e) {}
   // Default sample data
+  const board = { id: uid('board'), title: '东青Trello看板', createdAt: new Date().toISOString(), lists: makeSampleLists() };
   state = {
-    boardTitle: '东青Trello看板',
+    version: 2,
+    boards: [board],
+    activeBoardId: board.id,
+    archive: [],
+    bgImage: null,
+    bgDim: true,
     aiApiKey: '',
     aiEndpoint: 'https://api.deepseek.com/chat/completions',
     aiModel: 'deepseek-chat',
-    lists: [
-      {
-        id: uid('list'), title: '待办',
-        cards: [
-          { id: uid('card'), title: '设计登录页面 UI 原型', description: '需要完成登录、注册、忘记密码三个页面的高保真设计稿，包含明暗主题适配。', labels: [{color:'purple',text:'设计'}], subtasks: [
-            { id: uid('sub'), text: '绘制线框图', done: true },
-            { id: uid('sub'), text: '完成高保真稿', done: false },
-            { id: uid('sub'), text: '明暗主题适配', done: false },
-          ]},
-          { id: uid('card'), title: '编写 API 接口文档', description: '', labels: [{color:'blue',text:'文档'}], subtasks: [
-            { id: uid('sub'), text: '用户认证接口', done: true },
-            { id: uid('sub'), text: '数据 CRUD 接口', done: false },
-          ]},
-        ]
-      },
-      {
-        id: uid('list'), title: '进行中',
-        cards: [
-          { id: uid('card'), title: '实现拖拽排序功能', description: '使用原生 Pointer Events 实现 FLIP 动画驱动的拖拽排序，支持跨列表移动。', labels: [{color:'green',text:'开发'},{color:'orange',text:'紧急'}], subtasks: [
-            { id: uid('sub'), text: '卡片拖拽', done: true },
-            { id: uid('sub'), text: '列表拖拽', done: true },
-            { id: uid('sub'), text: '边缘自动滚动', done: false },
-          ]},
-          { id: uid('card'), title: '数据库性能优化', description: '针对慢查询进行索引优化', labels: [{color:'green',text:'开发'}], subtasks: [] },
-        ]
-      },
-      {
-        id: uid('list'), title: '已完成',
-        cards: [
-          { id: uid('card'), title: '项目环境搭建', description: '', labels: [{color:'cyan',text:'运维'}], subtasks: [
-            { id: uid('sub'), text: '配置 CI/CD', done: true },
-            { id: uid('sub'), text: '部署开发服务器', done: true },
-          ]},
-          { id: uid('card'), title: '需求评审会议', description: '与产品团队完成第一轮需求评审', labels: [{color:'red',text:'会议'}], subtasks: [] },
-        ]
-      },
-    ]
   };
+}
+
+/* Keep every field present and alias state.lists/state.boardTitle to the
+   active board so all legacy list/card code keeps working unchanged. */
+function normalizeState() {
+  if (!Array.isArray(state.boards) || !state.boards.length) {
+    state.boards = [{ id: uid('board'), title: state.boardTitle || '我的看板', createdAt: new Date().toISOString(), lists: [] }];
+  }
+  state.boards.forEach(b => {
+    if (!Array.isArray(b.lists)) b.lists = [];
+    b.lists.forEach(list => {
+      if (!Array.isArray(list.cards)) list.cards = [];
+      list.cards.forEach(migrateCard);
+    });
+  });
+  if (!state.boards.find(b => b.id === state.activeBoardId)) {
+    state.activeBoardId = state.boards[0].id;
+  }
+  if (!Array.isArray(state.archive)) state.archive = [];
+  state.archive.forEach(a => { if (a.archivedAt === undefined) a.archivedAt = new Date().toISOString(); });
+  syncActiveBoardAlias();
+}
+
+function getActiveBoard() {
+  return state.boards.find(b => b.id === state.activeBoardId) || state.boards[0];
+}
+
+function syncActiveBoardAlias() {
+  const board = getActiveBoard();
+  state.lists = board.lists;
+  state.boardTitle = board.title;
 }
 
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
 
+function switchBoard(boardId) {
+  if (!state.boards.find(b => b.id === boardId)) return;
+  state.activeBoardId = boardId;
+  syncActiveBoardAlias();
+  resetCalendarPosition();
+  saveState();
+  renderBoard();
+  updateBoardSwitcherUI();
+}
+
+function createBoard(title) {
+  const board = { id: uid('board'), title: title || '新建看板', createdAt: new Date().toISOString(), lists: makeSampleLists() };
+  state.boards.push(board);
+  switchBoard(board.id);
+  return board;
+}
+
+function deleteBoard(boardId) {
+  if (state.boards.length <= 1) { showToast('至少保留一个看板', 'error'); return; }
+  const board = state.boards.find(b => b.id === boardId);
+  if (!board) return;
+  const idx = state.boards.indexOf(board);
+  snapshotForUndo();
+  state.boards.splice(idx, 1);
+  if (state.activeBoardId === boardId) state.activeBoardId = state.boards[Math.max(0, idx - 1)].id;
+  syncActiveBoardAlias();
+  saveState();
+  renderBoard();
+  updateBoardSwitcherUI();
+  showToast(`已删除看板「${board.title}」`, null, '撤销删除看板', () => { undoPop(); });
+}
+
+function updateBoardSwitcherUI() {
+  const board = getActiveBoard();
+  const nameEl = document.getElementById('board-switcher-name');
+  const countEl = document.getElementById('board-switcher-count');
+  if (nameEl) nameEl.textContent = board.title;
+  if (countEl) countEl.textContent = board.lists.reduce((s, l) => s + l.cards.length, 0);
+  boardTitleEl.textContent = board.title;
+  document.title = board.title;
+}
+
+function openBoardSwitcher(x, y) {
+  const menu = document.getElementById('board-switcher-menu');
+  menu.innerHTML = '<div class="bsm-title">我的看板</div>';
+  state.boards.forEach(b => {
+    const cardCount = b.lists.reduce((s, l) => s + l.cards.length, 0);
+    const item = document.createElement('div');
+    item.className = 'bsm-item' + (b.id === state.activeBoardId ? ' active' : '');
+    item.innerHTML = `
+      <span class="bsm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></span>
+      <span class="bsm-name">${escapeHtml(b.title)}</span>
+      <span class="bsm-meta">${b.lists.length} 列表 · ${cardCount} 卡片</span>
+      ${state.boards.length > 1 ? '<button class="bsm-action" title="删除看板">&times;</button>' : ''}
+    `;
+    if (state.boards.length > 1) {
+      item.querySelector('.bsm-action').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteBoard(b.id);
+        menu.classList.remove('active');
+      });
+    }
+    item.addEventListener('click', () => {
+      switchBoard(b.id);
+      menu.classList.remove('active');
+    });
+    menu.appendChild(item);
+  });
+  const newBtn = document.createElement('button');
+  newBtn.className = 'bsm-new';
+  newBtn.textContent = '＋ 新建看板';
+  newBtn.addEventListener('click', () => {
+    menu.classList.remove('active');
+    const name = prompt('新看板名称：', '新建看板');
+    if (name === null) return;
+    createBoard(name.trim() || '新建看板');
+    showToast(`已创建看板「${name.trim() || '新建看板'}」`);
+  });
+  menu.appendChild(newBtn);
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.classList.add('active');
+  // keep inside viewport
+  const r = menu.getBoundingClientRect();
+  if (r.right > window.innerWidth - 8) menu.style.left = Math.max(8, window.innerWidth - r.width - 8) + 'px';
+  if (r.bottom > window.innerHeight - 8) menu.style.top = Math.max(8, window.innerHeight - r.height - 8) + 'px';
+}
+
+/* ============================================================
+   Undo / Toast
+   ============================================================ */
+let undoStack = null;      // serialized state snapshot for one-shot undo
+let undoTimer = null;
+
+function snapshotForUndo() {
+  try { undoStack = localStorage.getItem(STORAGE_KEY); } catch(e) { undoStack = null; }
+  if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+}
+
+function undoPop() {
+  if (undoStack === null) return;
+  const raw = undoStack;
+  undoStack = null;
+  // Close card modal if open: the modal holds a reference to a stale card object
+  if (currentModalCard) {
+    currentModalCard = null;
+    modalOverlay.classList.remove('active');
+    modalOverlay.style.display = 'none';
+    document.removeEventListener('keydown', modalKeydownHandler);
+    if (modalPasteHandler) { document.removeEventListener('paste', modalPasteHandler); modalPasteHandler = null; }
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && (parsed.lists || Array.isArray(parsed.boards))) {
+      state = parsed;
+      normalizeState();
+      saveState();
+      renderBoard();
+      updateBoardSwitcherUI();
+      if (currentView === 'calendar') renderCalendarView();
+      if (currentView === 'stats') renderStatsView();
+      showToast('已撤销');
+    }
+  } catch(e) { showToast('撤销失败', 'error'); }
+}
+
+function showToast(msg, kind, actionLabel, actionFn, timeout) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (kind === 'error' ? ' toast-error' : '');
+  const msgSpan = document.createElement('span');
+  msgSpan.className = 'toast-msg';
+  msgSpan.textContent = msg;
+  if (kind === 'error') msgSpan.style.color = 'var(--danger)';
+  toast.appendChild(msgSpan);
+  let done = false;
+  const removeToast = () => {
+    if (done) return;
+    done = true;
+    toast.classList.add('leaving');
+    setTimeout(() => toast.remove(), 300);
+  };
+  if (actionLabel && actionFn) {
+    const btn = document.createElement('button');
+    btn.className = 'toast-undo';
+    btn.textContent = actionLabel;
+    btn.addEventListener('click', () => { actionFn(); btn.disabled = true; removeToast(); });
+    toast.appendChild(btn);
+  }
+  container.appendChild(toast);
+  setTimeout(removeToast, timeout || (actionLabel ? 6000 : 2600));
+}
+
+/* ============================================================
+   Archive
+   ============================================================ */
+function archiveCard(card, list) {
+  const listTitle = list ? list.title : '';
+  snapshotForUndo();
+  if (list) {
+    const idx = list.cards.findIndex(c => c.id === card.id);
+    if (idx !== -1) list.cards.splice(idx, 1);
+  }
+  state.archive.unshift({ type: 'card', card, listTitle, listId: list ? list.id : null, boardId: getActiveBoard().id, archivedAt: new Date().toISOString() });
+  saveState();
+  renderBoard();
+  showToast('卡片已归档', null, '撤销', () => { undoPop(); });
+}
+
+function unarchiveItem(item) {
+  snapshotForUndo();
+  const idx = state.archive.indexOf(item);
+  if (idx !== -1) state.archive.splice(idx, 1);
+  if (item.type === 'card') {
+    let board = state.boards.find(b => b.id === item.boardId) || getActiveBoard();
+    let list = board.lists.find(l => l.id === item.listId);
+    if (!list) {
+      list = { id: uid('list'), title: item.listTitle || '已归档卡片', cards: [] };
+      board.lists.push(list);
+    }
+    migrateCard(item.card);
+    list.cards.push(item.card);
+  }
+  saveState();
+  renderArchiveView();
+  renderBoard();
+  updateBoardSwitcherUI();
+  showToast('已恢复');
+}
+
+function deleteArchivedItem(item) {
+  const idx = state.archive.indexOf(item);
+  if (idx !== -1) state.archive.splice(idx, 1);
+  saveState();
+  renderArchiveView();
+}
+
+function renderArchiveView() {
+  const listEl = document.getElementById('archive-list');
+  if (!state.archive.length) {
+    listEl.innerHTML = '<div class="archive-empty">归档站是空的。右键卡片选择「归档卡片」，或删除卡片后在这里找回。</div>';
+    return;
+  }
+  listEl.innerHTML = '';
+  state.archive.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'archive-item';
+    const when = formatDate(item.archivedAt);
+    if (item.type === 'card') {
+      el.innerHTML = `
+        <div class="ai-main">
+          <div class="ai-title">${escapeHtml(item.card.title)}</div>
+          <div class="ai-meta">卡片 · 原列表「${escapeHtml(item.listTitle || '未知')}」 · 归档于 ${when}</div>
+        </div>
+        <div class="ai-actions">
+          <button class="arc-restore">恢复</button>
+          <button class="arc-delete">删除</button>
+        </div>`;
+    } else {
+      const cardCount = (item.list.cards || []).length;
+      el.innerHTML = `
+        <div class="ai-main">
+          <div class="ai-title">${escapeHtml(item.list.title)}</div>
+          <div class="ai-meta">列表 · ${cardCount} 张卡片 · 归档于 ${when}</div>
+        </div>
+        <div class="ai-actions">
+          <button class="arc-restore">恢复</button>
+          <button class="arc-delete">删除</button>
+        </div>`;
+    }
+    el.querySelector('.arc-restore').addEventListener('click', () => unarchiveItem(item));
+    el.querySelector('.arc-delete').addEventListener('click', () => {
+      snapshotForUndo();
+      deleteArchivedItem(item);
+      showToast('已从归档站删除', null, '撤销', () => { undoPop(); });
+    });
+    listEl.appendChild(el);
+  });
+}
+
+/* ============================================================
+   Search & Filter
+   ============================================================ */
+let searchQuery = '';
+let filterLabels = new Set();
+let filterDue = new Set();
+
+function cardMatchesSearch(card) {
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const hay = (card.title + ' ' + (card.description || '')).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  if (filterLabels.size) {
+    const cardLabels = (card.labels || []).map(l => l.color + ':' + (l.text || ''));
+    const hit = cardLabels.some(key => filterLabels.has(key));
+    if (!hit) return false;
+  }
+  if (filterDue.size) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (!card.dueDate) return false;
+    const due = new Date(card.dueDate + 'T00:00:00');
+    const diffDays = Math.round((due - today) / 86400000);
+    let bucket = 'later';
+    if (diffDays < 0) bucket = 'overdue';
+    else if (diffDays === 0) bucket = 'today';
+    else if (diffDays <= 7) bucket = 'week';
+    if (!filterDue.has(bucket)) return false;
+  }
+  return true;
+}
+
+function isFilterActive() {
+  return !!(searchQuery || filterLabels.size || filterDue.size);
+}
+
+function applySearchStateUI() {
+  const searchBar = document.getElementById('search-bar');
+  const clearBtn = document.getElementById('search-clear');
+  const filterBtn = document.getElementById('filter-btn');
+  const active = isFilterActive();
+  if (clearBtn) clearBtn.classList.toggle('visible', active);
+  if (filterBtn) filterBtn.classList.toggle('active', !!(filterLabels.size || filterDue.size));
+  boardEl.classList.toggle('board-filtered', active && currentView === 'board');
+  renderBoard();
+}
+
+function getFilteredVisibleCount() {
+  let total = 0, shown = 0;
+  getActiveBoard().lists.forEach(l => l.cards.forEach(c => {
+    total++;
+    if (cardMatchesSearch(c)) shown++;
+  }));
+  return { total, shown };
+}
+
+function updateSearchCount() {
+  const el = document.getElementById('search-count');
+  if (!el) return;
+  if (!isFilterActive()) { el.textContent = ''; return; }
+  const { total, shown } = getFilteredVisibleCount();
+  el.textContent = `${shown}/${total} 张卡片`;
+}
+
+function collectAllLabelKeys() {
+  const map = new Map();
+  getActiveBoard().lists.forEach(l => l.cards.forEach(c => {
+    (c.labels || []).forEach(lb => {
+      const key = lb.color + ':' + (lb.text || '');
+      if (!map.has(key)) map.set(key, { color: lb.color, text: lb.text || '', count: 0 });
+      map.get(key).count++;
+    });
+  }));
+  return Array.from(map.values()).sort((a, b) => b.count - a.count);
+}
+
+function openFilterMenu(x, y) {
+  const labels = collectAllLabelKeys();
+  const rows = [];
+  rows.push('<div class="fm-title">到期日</div><div class="fm-row">');
+  const dueDefs = [
+    ['overdue', '已过期'],
+    ['today', '今天到期'],
+    ['week', '7 天内'],
+    ['later', '更晚'],
+  ];
+  dueDefs.forEach(([key, name]) => {
+    rows.push(`<button class="fm-chip ${filterDue.has(key) ? 'active' : ''}" data-due="${key}">${name}</button>`);
+  });
+  rows.push('</div>');
+  rows.push('<div class="fm-title">标签</div><div class="fm-row">');
+  if (!labels.length) rows.push('<span style="font-size:12px;color:var(--text-faint);padding:4px 2px;">当前看板暂无标签</span>');
+  labels.forEach(lb => {
+    const key = lb.color + ':' + lb.text;
+    const c = LABEL_COLORS[lb.color] || LABEL_COLORS.blue;
+    rows.push(`<button class="fm-chip fm-label-dot ${filterLabels.has(key) ? 'active' : ''}" data-label="${escapeHtml(key)}" style="--dot:${c.bg}">${escapeHtml(lb.text || c.name)} (${lb.count})</button>`);
+  });
+  rows.push('</div>');
+  rows.push('<div class="fm-row" style="padding-top:0"><button class="fm-chip" data-clear="1">清除全部筛选</button></div>');
+  showContextMenu(x, y, [], rows.join(''));
+  document.querySelectorAll('#context-menu .fm-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (chip.dataset.due) {
+        const k = chip.dataset.due;
+        filterDue.has(k) ? filterDue.delete(k) : filterDue.add(k);
+        chip.classList.toggle('active');
+      } else if (chip.dataset.label) {
+        const k = chip.dataset.label;
+        filterLabels.has(k) ? filterLabels.delete(k) : filterLabels.add(k);
+        chip.classList.toggle('active');
+      } else if (chip.dataset.clear) {
+        filterDue.clear(); filterLabels.clear();
+        document.querySelectorAll('#context-menu .fm-chip.active').forEach(el => el.classList.remove('active'));
+      }
+      document.getElementById('filter-btn').classList.toggle('active', !!(filterLabels.size || filterDue.size));
+      contextMenu.classList.add('active');
+      applySearchStateUI();
+      updateSearchCount();
+    });
+  });
+}
+
+/* ============================================================
+   Markdown (safe subset renderer)
+   ============================================================ */
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function mdInline(text) {
+  let s = escapeHtml(text);
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/!\[([^\]]*)\]\((https?:[^)\s]+)\)/g, '<img src="$2" alt="$1">');
+  s = s.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+  return s;
+}
+
+function renderMarkdown(md) {
+  const lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+  let html = '', para = [], listStack = null, inCode = false, codeLines = [];
+
+  const flushPara = () => {
+    if (para.length) { html += '<p>' + mdInline(para.join('<br>')) + '</p>'; para = []; }
+  };
+  const closeList = () => {
+    if (listStack) { html += listStack === 'ul' ? '</ul>' : '</ol>'; listStack = null; }
+  };
+
+  for (const raw of lines) {
+    if (/^```/.test(raw.trim())) {
+      if (inCode) { html += '<pre><code>' + escapeHtml(codeLines.join('\n')) + '</code></pre>'; codeLines = []; inCode = false; }
+      else { flushPara(); closeList(); inCode = true; }
+      continue;
+    }
+    if (inCode) { codeLines.push(raw); continue; }
+
+    const t = raw.trim();
+    if (!t) { flushPara(); closeList(); continue; }
+
+    let m;
+    if ((m = t.match(/^(#{1,4})\s+(.*)$/))) {
+      flushPara(); closeList();
+      const level = m[1].length;
+      html += `<h${level}>` + mdInline(m[2]) + `</h${level}>`;
+      continue;
+    }
+    if (/^(---+|\*\*\*+)$/.test(t)) { flushPara(); closeList(); html += '<hr>'; continue; }
+    if ((m = t.match(/^>\s?(.*)$/))) {
+      flushPara(); closeList();
+      html += '<blockquote><p>' + mdInline(m[1]) + '</p></blockquote>';
+      continue;
+    }
+    if ((m = t.match(/^[-*+]\s+(.*)$/))) {
+      flushPara();
+      if (listStack !== 'ul') { closeList(); html += '<ul>'; listStack = 'ul'; }
+      html += '<li>' + mdInline(m[1]) + '</li>';
+      continue;
+    }
+    if ((m = t.match(/^\d+[.)]\s+(.*)$/))) {
+      flushPara();
+      if (listStack !== 'ol') { closeList(); html += '<ol>'; listStack = 'ol'; }
+      html += '<li>' + mdInline(m[1]) + '</li>';
+      continue;
+    }
+    closeList();
+    para.push(t);
+  }
+  if (inCode && codeLines.length) html += '<pre><code>' + escapeHtml(codeLines.join('\n')) + '</code></pre>';
+  flushPara(); closeList();
+  return html || '<p class="md-empty">暂无描述</p>';
+}
+
+/* ============================================================
+   Attachments
+   ============================================================ */
+function formatBytes(n) {
+  if (!n && n !== 0) return '';
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function addAttachmentFromDataUrl(card, dataUrl, name) {
+  const bytes = Math.floor(dataUrl.length * 0.75);
+  if (bytes > 3 * 1024 * 1024) {
+    showToast('图片过大（超过 3MB），未添加', 'error');
+    return false;
+  }
+  card.attachments = card.attachments || [];
+  card.attachments.push({ id: uid('att'), name: name || '截图.png', data: dataUrl, size: bytes, createdAt: new Date().toISOString() });
+  saveState();
+  return true;
+}
+
+function renderModalAttachments(card) {
+  const listEl = document.getElementById('attach-list');
+  listEl.innerHTML = '';
+  if (!card.attachments || !card.attachments.length) {
+    listEl.innerHTML = '<div class="attach-empty">暂无附件，添加或粘贴图片后显示在这里</div>';
+    return;
+  }
+  card.attachments.forEach(att => {
+    const item = document.createElement('div');
+    item.className = 'attach-item';
+    const img = document.createElement('img');
+    img.className = 'attach-thumb';
+    img.src = att.data;
+    img.alt = att.name;
+    img.title = '点击放大预览';
+    img.addEventListener('click', () => openLightbox(att.data));
+    const name = document.createElement('span');
+    name.className = 'attach-name';
+    name.textContent = att.name;
+    const size = document.createElement('span');
+    size.className = 'attach-size';
+    size.textContent = formatBytes(att.size);
+    const del = document.createElement('button');
+    del.className = 'attach-delete';
+    del.title = '删除附件';
+    del.textContent = '×';
+    del.addEventListener('click', () => {
+      snapshotForUndo();
+      card.attachments = card.attachments.filter(a => a.id !== att.id);
+      saveState();
+      renderModalAttachments(card);
+      showToast('附件已删除', null, '撤销', () => { undoPop(); renderModalAttachments(card); });
+    });
+    item.appendChild(img);
+    item.appendChild(name);
+    item.appendChild(size);
+    item.appendChild(del);
+    listEl.appendChild(item);
+  });
+}
+
+function openLightbox(dataUrl) {
+  const lb = document.getElementById('lightbox');
+  lb.querySelector('img').src = dataUrl;
+  lb.classList.add('active');
+}
+
+function openAttachFilePicker(card) {
+  const input = document.getElementById('attach-file-input');
+  input.value = '';
+  input.onchange = () => {
+    const files = Array.from(input.files || []);
+    let added = 0;
+    let pending = files.length;
+    if (!pending) return;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (addAttachmentFromDataUrl(card, reader.result, file.name)) added++;
+        pending--;
+        if (!pending) {
+          renderModalAttachments(card);
+          if (added) showToast(`已添加 ${added} 个附件`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+/* ============================================================
+   Export / Import / Background
+   ============================================================ */
+function exportData() {
+  try {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `看板备份-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('备份文件已导出');
+  } catch (e) {
+    showToast('导出失败：' + e.message, 'error');
+  }
+}
+
+function openImportPicker() {
+  const input = document.getElementById('import-file-input');
+  input.value = '';
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        const ok = (parsed && (Array.isArray(parsed.boards) || Array.isArray(parsed.lists)));
+        if (!ok) throw new Error('文件格式不正确');
+        snapshotForUndo();
+        state = parsed;
+        normalizeState();
+        saveState();
+        resetCalendarPosition();
+        renderBoard();
+        updateBoardSwitcherUI();
+        applyCustomBackground();
+        if (currentView === 'calendar') renderCalendarView();
+        if (currentView === 'stats') renderStatsView();
+        showToast('导入成功', null, '撤销导入', () => { undoPop(); });
+      } catch (e) {
+        showToast('导入失败：' + e.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function applyCustomBackground() {
+  document.body.classList.toggle('custom-bg', !!state.bgImage);
+  document.body.classList.toggle('custom-bg-dim', !!state.bgImage && state.bgDim !== false);
+  if (state.bgImage) {
+    document.body.style.setProperty('--custom-bg-image', `url("${state.bgImage}")`);
+  } else {
+    document.body.style.removeProperty('--custom-bg-image');
+  }
+}
+
+function openBgPicker() {
+  const input = document.getElementById('bg-file-input');
+  input.value = '';
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 6 * 1024 * 1024) { showToast('背景图片过大（超过 6MB）', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.bgImage = reader.result;
+      saveState();
+      applyCustomBackground();
+      showToast('背景已更新', null, '撤销', () => { undoPop(); applyCustomBackground(); });
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function openToolMenu(x, y) {
+  showContextMenu(x, y, [
+    { label: '导出备份（JSON）', icon: '📤', action: exportData },
+    { label: '导入备份', icon: '📥', action: openImportPicker },
+    { label: '打开归档站', icon: '📦', action: openArchiveModal },
+    { label: '自定义背景图片', icon: '🖼', action: openBgPicker },
+    { label: state.bgImage ? '恢复默认背景' : '背景调亮/调暗', icon: state.bgImage ? '↺' : '◐', action: () => {
+      if (state.bgImage) {
+        snapshotForUndo();
+        state.bgImage = null;
+        saveState();
+        applyCustomBackground();
+        showToast('已恢复默认背景', null, '撤销', () => { undoPop(); applyCustomBackground(); });
+      } else if (state.bgImage) {
+        state.bgDim = !state.bgDim;
+        saveState();
+        applyCustomBackground();
+      }
+    }},
+    { label: '键盘快捷键', icon: '⌨️', action: openShortcutsModal },
+  ]);
+}
+
+/* ============================================================
+   Archive / Shortcuts modals
+   ============================================================ */
+function openArchiveModal() { renderArchiveView(); document.getElementById('archive-modal').classList.add('active'); }
+function closeArchiveModal() { document.getElementById('archive-modal').classList.remove('active'); }
+
+const SHORTCUT_GROUPS = [
+  { title: '全局', items: [
+    ['打开命令面板', ['Ctrl', 'K']],
+    ['搜索 / 筛选', ['Ctrl', 'F']],
+    ['切换看板视图', ['Ctrl', '1']],
+    ['切换日历视图', ['Ctrl', '2']],
+    ['切换统计视图', ['Ctrl', '3']],
+    ['切换明暗主题', ['Ctrl', 'J']],
+    ['撤销最近操作', ['Ctrl', 'Z']],
+    ['快捷键帮助', ['?']],
+    ['退出输入框', ['Esc']],
+  ]},
+  { title: '看板操作', items: [
+    ['打开工具菜单', ['Ctrl', 'L']],
+    ['新建列表（末尾）', ['Ctrl', 'N']],
+  ]},
+  { title: '卡片详情弹窗', items: [
+    ['关闭弹窗', ['Esc']],
+    ['Markdown 预览开关', ['Ctrl', 'M']],
+    ['粘贴截图为附件', ['⌘/Ctrl', 'V']],
+  ]},
+];
+
+function buildShortcutsHelp() {
+  const body = document.getElementById('shortcuts-body');
+  body.innerHTML = SHORTCUT_GROUPS.map(g => `
+    <div class="sc-group">
+      <h4>${g.title}</h4>
+      ${g.items.map(([name, keys]) => `
+        <div class="sc-row">
+          <span>${name}</span>
+          <span class="sc-keys">${keys.map(k => `<kbd>${k}</kbd>`).join('')}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function openShortcutsModal() { buildShortcutsHelp(); document.getElementById('shortcuts-modal').classList.add('active'); }
+function closeShortcutsModal() { document.getElementById('shortcuts-modal').classList.remove('active'); }
+
+/* ============================================================
+   Command Palette
+   ============================================================ */
+let paletteSelected = 0;
+let paletteItems = [];
+
+function collectPaletteCommands() {
+  const cmds = [
+    { icon: '🎛', title: '切换到看板视图', sub: '视图', run: () => switchView('board') },
+    { icon: '📅', title: '切换到日历视图', sub: '视图', run: () => switchView('calendar') },
+    { icon: '📊', title: '切换到统计视图', sub: '视图', run: () => switchView('stats') },
+    { icon: '🌙', title: '切换明暗主题', sub: '外观', run: toggleTheme },
+    { icon: '📦', title: '打开归档站', sub: '工具', run: openArchiveModal },
+    { icon: '📤', title: '导出备份（JSON）', sub: '工具', run: exportData },
+    { icon: '📥', title: '导入备份', sub: '工具', run: openImportPicker },
+    { icon: '🖼', title: '自定义背景图片', sub: '外观', run: openBgPicker },
+    { icon: '＋', title: '新建看板', sub: '看板', run: () => {
+        const name = prompt('新看板名称：', '新建看板');
+        if (name !== null) createBoard(name.trim() || '新建看板');
+      } },
+    ...state.boards.filter(b => b.id !== state.activeBoardId).map(b => ({
+      icon: '🔀', title: '切换到看板「' + b.title + '」', sub: '看板', run: () => switchBoard(b.id),
+    })),
+    { icon: '⌨️', title: '键盘快捷键帮助', sub: '帮助', run: openShortcutsModal },
+    { icon: '⚙️', title: 'AI 设置', sub: '工具', run: openAISettings },
+  ];
+  return cmds;
+}
+
+function paletteRenderList(q) {
+  const listEl = document.getElementById('palette-list');
+  paletteItems = [];
+  if (q.startsWith('>')) {
+    const qs = q.slice(1).trim().toLowerCase();
+    paletteItems = collectPaletteCommands()
+      .filter(c => !qs || c.title.toLowerCase().includes(qs) || c.sub.includes(qs))
+      .map(c => ({ kind: 'cmd', ...c }));
+  } else {
+    const qs = q.trim().toLowerCase();
+    getActiveBoard().lists.forEach(list => {
+      list.cards.forEach(card => {
+        const hay = (card.title + ' ' + (card.description || '')).toLowerCase();
+        if (!qs || hay.includes(qs)) {
+          paletteItems.push({ kind: 'card', icon: '🗂', title: card.title, sub: '列表「' + list.title + '」', run: () => openCardById(card.id) });
+        }
+      });
+    });
+    if (!qs) {
+      collectPaletteCommands().forEach(c => paletteItems.push({ kind: 'cmd', ...c }));
+    }
+  }
+  paletteSelected = Math.min(paletteSelected, Math.max(0, paletteItems.length - 1));
+  if (!paletteItems.length) {
+    listEl.innerHTML = '<div class="palette-empty">没有匹配的结果</div>';
+    return;
+  }
+  listEl.innerHTML = paletteItems.map((it, i) => `
+    <div class="palette-item ${i === paletteSelected ? 'selected' : ''}" data-index="${i}">
+      <div class="pi-icon">${it.icon}</div>
+      <div class="pi-text">
+        <div class="pi-title">${escapeHtml(it.title)}</div>
+        <div class="pi-sub">${escapeHtml(it.sub || '')}</div>
+      </div>
+    </div>`).join('');
+  listEl.querySelectorAll('.palette-item').forEach(el => {
+    el.addEventListener('click', () => {
+      closePalette();
+      paletteItems[Number(el.dataset.index)].run();
+    });
+    el.addEventListener('mousemove', () => {
+      const idx = Number(el.dataset.index);
+      if (idx !== paletteSelected) {
+        paletteSelected = idx;
+        listEl.querySelectorAll('.palette-item').forEach((n, i) => n.classList.toggle('selected', i === idx));
+      }
+    });
+  });
+  const sel = listEl.querySelector('.palette-item.selected');
+  if (sel) sel.scrollIntoView({ block: 'nearest' });
+}
+
+function openPalette() {
+  const overlay = document.getElementById('palette-overlay');
+  const input = document.getElementById('palette-input');
+  overlay.classList.add('active');
+  input.value = '';
+  paletteSelected = 0;
+  paletteRenderList('');
+  setTimeout(() => input.focus(), 30);
+}
+
+function closePalette() {
+  document.getElementById('palette-overlay').classList.remove('active');
+}
+
+function paletteKeydown(e) {
+  if (e.key === 'Escape') { e.preventDefault(); closePalette(); return; }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    paletteSelected = Math.min(paletteSelected + 1, paletteItems.length - 1);
+    paletteRenderList(document.getElementById('palette-input').value);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    paletteSelected = Math.max(paletteSelected - 1, 0);
+    paletteRenderList(document.getElementById('palette-input').value);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const item = paletteItems[paletteSelected];
+    if (item) { closePalette(); item.run(); }
+  }
+}
+
+/* ============================================================
+   Global Keyboard Shortcuts
+   ============================================================ */
+function isEditableTarget(t) {
+  return !!(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || t.tagName === 'SELECT'));
+}
+
+function handleGlobalKeydown(e) {
+  const mod = e.metaKey || e.ctrlKey;
+  const target = e.target;
+
+  // Escape: close overlays in priority order
+  if (e.key === 'Escape') {
+    if (document.getElementById('palette-overlay').classList.contains('active')) { closePalette(); return; }
+    if (document.getElementById('lightbox').classList.contains('active')) { document.getElementById('lightbox').classList.remove('active'); return; }
+    if (document.getElementById('archive-modal').classList.contains('active')) { closeArchiveModal(); return; }
+    if (document.getElementById('shortcuts-modal').classList.contains('active')) { closeShortcutsModal(); return; }
+    // AI settings modal handles itself; modal handled by modalKeydownHandler
+  }
+
+  if (e.key === '?' && !isEditableTarget(target) && !mod) {
+    e.preventDefault();
+    openShortcutsModal();
+    return;
+  }
+
+  if (!mod) return;
+  const k = e.key.toLowerCase();
+
+  if (k === 'k') { e.preventDefault(); openPalette(); return; }
+  if (k === 'f') { e.preventDefault(); switchView('board'); const inp = document.getElementById('search-input'); inp.focus(); inp.select(); return; }
+  if (k === '1') { e.preventDefault(); switchView('board'); return; }
+  if (k === '2') { e.preventDefault(); switchView('calendar'); return; }
+  if (k === '3') { e.preventDefault(); switchView('stats'); return; }
+  if (k === 'j') { e.preventDefault(); toggleTheme(); return; }
+  if (k === 'l') { e.preventDefault(); const r = document.getElementById('tool-btn').getBoundingClientRect(); openToolMenu(r.left, r.bottom + 6); return; }
+  if (k === 'n' && !isEditableTarget(target)) { e.preventDefault(); const ph = boardEl.querySelector('.add-list-placeholder'); if (ph) ph.click(); return; }
+  if (k === 'z' && undoStack !== null && !isEditableTarget(target)) { e.preventDefault(); undoPop(); return; }
+  if (k === 'enter' && undoStack !== null && !isEditableTarget(target)) { e.preventDefault(); undoPop(); return; }
+
+  // Markdown preview toggle inside card modal
+  if (k === 'm' && currentModalCard && !isEditableTarget(target)) {
+    e.preventDefault();
+    toggleMarkdownPreview();
+  }
+}
+
 function markCardIfCompleted(card, listTitle) {
-  const doneKeywords = /完成|done|已完成|完毕/i;
-  if (doneKeywords.test(listTitle || '')) {
+  if (completedKeywords.test(listTitle || '')) {
     card.completedAt = new Date().toISOString();
   } else {
     card.completedAt = null;
@@ -1761,6 +3405,8 @@ function formatDate(dateStr) {
   if (isNaN(d.getTime())) return '';
   return (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
+
+const completedKeywords = /完成|done|已完成|完毕/i;
 
 /* ============================================================
    Render
@@ -1792,9 +3438,19 @@ function renderList(list, listIndex) {
     </div>
   `;
   const cardsContainer = el.querySelector('.list-cards');
+  let visibleCount = 0;
   list.cards.forEach((card, cardIndex) => {
+    if (!cardMatchesSearch(card)) return;
     cardsContainer.appendChild(renderCard(card, list.id, cardIndex));
+    visibleCount++;
   });
+  if (isFilterActive() && !visibleCount) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:10px 6px;font-size:12px;color:var(--text-faint);text-align:center;';
+    empty.textContent = '无匹配卡片';
+    cardsContainer.appendChild(empty);
+  }
+  el.querySelector('.list-count').textContent = isFilterActive() ? `${visibleCount}/${list.cards.length}` : list.cards.length;
   attachListEvents(el, list, listIndex);
   return el;
 }
@@ -1818,6 +3474,7 @@ function renderCard(card, listId, cardIndex) {
     const done = card.subtasks.filter(s => s.done).length;
     badgesHtml = `<div class="card-badges">
       <span class="card-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>${done}/${card.subtasks.length}</span>
+      ${(card.attachments && card.attachments.length) ? `<span class="card-badge" title="${card.attachments.length} 个附件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>${card.attachments.length}</span>` : ''}
     </div>`;
   }
 
@@ -1859,6 +3516,7 @@ function renderAddListPlaceholder() {
         state.lists.push({ id: uid('list'), title, cards: [] });
         saveState();
         renderBoard();
+        updateBoardSwitcherUI();
       } else {
         renderBoard();
       }
@@ -1980,6 +3638,83 @@ function attachCardEvents(el, card, listId) {
     if (isDragging) { e.stopPropagation(); e.preventDefault(); return; }
     openModal(el, card, listId);
   });
+
+  el.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isDragging) return;
+    showCardContextMenu(e.clientX, e.clientY, card, listId);
+  });
+}
+
+function showCardContextMenu(x, y, card, listId) {
+  const board = getActiveBoard();
+  const otherLists = board.lists.filter(l => l.id !== listId);
+  const items = [
+    { label: '打开卡片', icon: '↗', action: () => openCardById(card.id) },
+    { label: '复制卡片', icon: '📄', action: () => {
+      snapshotForUndo();
+      const copy = {
+        ...card,
+        id: uid('card'),
+        title: card.title + '（副本）',
+        labels: (card.labels || []).map(l => ({ ...l })),
+        subtasks: (card.subtasks || []).map(s => ({ ...s, id: uid('sub') })),
+        attachments: (card.attachments || []).map(a => ({ ...a, id: uid('att') })),
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+      };
+      const list = board.lists.find(l => l.id === listId);
+      if (!list) return;
+      const idx = list.cards.findIndex(c => c.id === card.id);
+      list.cards.splice(idx + 1, 0, copy);
+      saveState();
+      renderBoard();
+      updateBoardSwitcherUI();
+      showToast('卡片已复制', null, '撤销', () => { undoPop(); });
+    }},
+  ];
+  if (otherLists.length) {
+    items.push({ label: '移动到列表 ▸', icon: '➜', action: () => {
+      const sub = otherLists.map(l => ({
+        label: l.title + ` (${l.cards.length})`,
+        icon: '·',
+        action: () => {
+          snapshotForUndo();
+          const from = board.lists.find(l => l.id === listId);
+          if (!from) return;
+          const idx = from.cards.findIndex(c => c.id === card.id);
+          if (idx === -1) return;
+          from.cards.splice(idx, 1);
+          if (completedKeywords.test(l.title || '')) card.completedAt = new Date().toISOString();
+          l.cards.push(card);
+          saveState();
+          renderBoard();
+          updateBoardSwitcherUI();
+          showToast(`已移动到「${l.title}」`, null, '撤销', () => { undoPop(); });
+        },
+      }));
+      showContextMenu(x, y, sub);
+    }});
+  }
+  items.push({ label: '归档卡片', icon: '📦', action: () => {
+    const list = board.lists.find(l => l.id === listId);
+    archiveCard(card, list);
+    updateBoardSwitcherUI();
+  }});
+  items.push({ label: '删除卡片', icon: '🗑', danger: true, action: () => {
+    snapshotForUndo();
+    const list = board.lists.find(l => l.id === listId);
+    if (!list) return;
+    const idx = list.cards.findIndex(c => c.id === card.id);
+    if (idx !== -1) list.cards.splice(idx, 1);
+    state.archive.unshift({ type: 'card', card, listTitle: list.title, listId: list.id, boardId: board.id, archivedAt: new Date().toISOString() });
+    saveState();
+    renderBoard();
+    updateBoardSwitcherUI();
+    showToast('卡片已删除（可在归档站找回）', null, '撤销', () => { undoPop(); });
+  }});
+  showContextMenu(x, y, items);
 }
 
 function beginCardDrag(e, cardEl, card, listId) {
@@ -2280,17 +4015,54 @@ function attachListEvents(listEl, list, listIndex) {
   menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     showContextMenu(e.clientX, e.clientY, [
+      { label: '复制列表', icon: '📄', action: () => {
+        snapshotForUndo();
+        const copy = {
+          id: uid('list'),
+          title: list.title + '（副本）',
+          cards: list.cards.map(c => ({
+            ...c,
+            id: uid('card'),
+            labels: (c.labels || []).map(l => ({ ...l })),
+            subtasks: (c.subtasks || []).map(s => ({ ...s, id: uid('sub') })),
+            attachments: (c.attachments || []).map(a => ({ ...a, id: uid('att') })),
+            createdAt: new Date().toISOString(),
+          })),
+        };
+        const idx = state.lists.findIndex(l => l.id === list.id);
+        state.lists.splice(idx + 1, 0, copy);
+        saveState();
+        renderBoard();
+        updateBoardSwitcherUI();
+        showToast('列表已复制', null, '撤销', () => { undoPop(); });
+      }},
+      { label: '归档列表', icon: '📦', action: () => {
+        snapshotForUndo();
+        const idx = state.lists.findIndex(l => l.id === list.id);
+        if (idx !== -1) state.lists.splice(idx, 1);
+        state.archive.unshift({ type: 'list', list, boardId: getActiveBoard().id, archivedAt: new Date().toISOString() });
+        saveState();
+        renderBoard();
+        updateBoardSwitcherUI();
+        showToast(`列表「${list.title}」已归档`, null, '撤销', () => { undoPop(); });
+      }},
       { label: '清空卡片', icon: '🗑', action: () => {
+        snapshotForUndo();
         list.cards = [];
         saveState();
         renderBoard();
+        updateBoardSwitcherUI();
+        showToast('已清空卡片', null, '撤销', () => { undoPop(); });
       }},
       { label: '删除列表', icon: '✕', danger: true, action: () => {
+        snapshotForUndo();
         const idx = state.lists.findIndex(l => l.id === list.id);
         if (idx !== -1) {
           state.lists.splice(idx, 1);
           saveState();
           renderBoard();
+          updateBoardSwitcherUI();
+          showToast(`列表「${list.title}」已删除`, null, '撤销', () => { undoPop(); });
         }
       }},
     ]);
@@ -2319,11 +4091,12 @@ function attachListEvents(listEl, list, listIndex) {
       const title = ta.value.trim();
       if (title) {
         list.cards.push({
-          id: uid('card'), title, description: '', labels: [], subtasks: [],
+          id: uid('card'), title, description: '', labels: [], subtasks: [], attachments: [],
           createdAt: new Date().toISOString(), dueDate: null, completedAt: null
         });
         saveState();
         renderBoard();
+        updateBoardSwitcherUI();
       } else {
         restoreAddCardBtn(listEl);
       }
@@ -2534,6 +4307,22 @@ function openModal(cardEl, card, listId) {
 
   renderModalLabels(card);
   renderModalSubtasks(card);
+  renderModalAttachments(card);
+
+  // Markdown preview state
+  const mdBtn = document.getElementById('md-toggle-btn');
+  const descTa = document.getElementById('modal-desc');
+  const mdPrev = document.getElementById('md-preview');
+  if (mdState.enabled && (card.description || '').trim()) {
+    mdPrev.innerHTML = renderMarkdown(card.description);
+    mdPrev.hidden = false;
+    descTa.hidden = true;
+    mdBtn.classList.add('active');
+  } else {
+    mdPrev.hidden = true;
+    descTa.hidden = false;
+    mdBtn.classList.remove('active');
+  }
 
   // Show overlay
   modalOverlay.style.display = 'flex';
@@ -2636,7 +4425,7 @@ function saveModalEdits() {
   const card = currentModalCard;
   const newTitle = modalEl.querySelector('.modal-title').textContent.trim();
   if (newTitle) card.title = newTitle;
-  card.description = modalEl.querySelector('.modal-desc').value;
+  card.description = document.getElementById('modal-desc').value;
   const dueDateInput = document.getElementById('modal-due-date');
   card.dueDate = dueDateInput ? (dueDateInput.value || null) : null;
 
@@ -2650,15 +4439,54 @@ function saveModalEdits() {
   saveState();
   // Re-render board to update badges/labels
   renderBoard();
+  updateBoardSwitcherUI();
 }
 
 function attachModalEvents(card, listId) {
   const closeBtn = modalEl.querySelector('.modal-close');
   const titleEl = modalEl.querySelector('.modal-title');
-  const descEl = modalEl.querySelector('.modal-desc');
+  const descEl = document.getElementById('modal-desc');
   const deleteBtn = modalEl.querySelector('.modal-delete-btn');
   const subtaskInput = modalEl.querySelector('.subtask-add input');
   const subtaskBtn = modalEl.querySelector('.subtask-add button');
+  const mdBtn = document.getElementById('md-toggle-btn');
+  const mdPrev = document.getElementById('md-preview');
+  const attachAddBtn = document.getElementById('attach-add-btn');
+
+  // Markdown preview toggle
+  mdBtn.onclick = () => { toggleMarkdownPreview(card); };
+  // Preview shows live content while typing in edit mode
+  descEl.oninput = () => {
+    if (!mdState.enabled) {
+      mdPrev.innerHTML = renderMarkdown(descEl.value);
+    }
+  };
+
+  // Paste screenshot as attachment while modal is open
+  modalPasteHandler = (e) => {
+    if (!currentModalCard || currentModalCard.id !== card.id) return;
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    for (const item of items) {
+      if (item.type && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (!file) continue;
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (addAttachmentFromDataUrl(card, reader.result, file.name || '截图.png')) {
+            renderModalAttachments(card);
+            showToast('已添加粘贴的截图');
+          }
+        };
+        reader.readAsDataURL(file);
+        e.preventDefault();
+        break;
+      }
+    }
+  };
+  document.addEventListener('paste', modalPasteHandler);
+
+  // Attachment add button
+  attachAddBtn.onclick = () => openAttachFilePicker(card);
 
   // Close on overlay click
   modalOverlay.onclick = (e) => {
@@ -2700,12 +4528,16 @@ function attachModalEvents(card, listId) {
     if (list) {
       const idx = list.cards.findIndex(c => c.id === card.id);
       if (idx !== -1) {
+        snapshotForUndo();
         list.cards.splice(idx, 1);
+        state.archive.unshift({ type: 'card', card, listTitle: list.title, listId: list.id, boardId: getActiveBoard().id, archivedAt: new Date().toISOString() });
         saveState();
         currentModalCard = null;
         modalOverlay.classList.remove('active');
         modalOverlay.style.display = 'none';
         renderBoard();
+        updateBoardSwitcherUI();
+        showToast('卡片已删除（可在归档站找回）', null, '撤销', () => { undoPop(); });
       }
     }
   };
@@ -2734,6 +4566,7 @@ function modalKeydownHandler(e) {
   if (e.key === 'Escape' && currentModalCard) {
     closeModal();
     document.removeEventListener('keydown', modalKeydownHandler);
+    if (modalPasteHandler) { document.removeEventListener('paste', modalPasteHandler); modalPasteHandler = null; }
   }
 }
 
@@ -2864,25 +4697,66 @@ function renderModalSubtasks(card) {
 }
 
 /* ============================================================
+   Command Palette / Modal-shared state
+   ============================================================ */
+const mdState = { enabled: false };
+let modalPasteHandler = null;
+
+function toggleMarkdownPreview(card) {
+  const c = card || currentModalCard;
+  if (!c) return;
+  const descEl = document.getElementById('modal-desc');
+  const mdPrev = document.getElementById('md-preview');
+  const mdBtn = document.getElementById('md-toggle-btn');
+  // flush pending description edits before previewing
+  c.description = descEl.value;
+  if (mdState.enabled) {
+    // back to edit mode
+    mdPrev.hidden = true;
+    descEl.hidden = false;
+    mdBtn.classList.remove('active');
+    mdState.enabled = false;
+  } else {
+    if (!(c.description || '').trim()) { showToast('描述为空，先写点内容再预览'); return; }
+    mdPrev.innerHTML = renderMarkdown(c.description);
+    mdPrev.hidden = false;
+    descEl.hidden = true;
+    mdBtn.classList.add('active');
+    mdState.enabled = true;
+  }
+}
+
+/* ============================================================
    Context Menu
    ============================================================ */
 const contextMenu = document.getElementById('context-menu');
-document.addEventListener('click', () => { contextMenu.classList.remove('active'); });
+document.addEventListener('click', (e) => {
+  if (!contextMenu.contains(e.target)) contextMenu.classList.remove('active');
+});
 
-function showContextMenu(x, y, items) {
-  contextMenu.innerHTML = items.map((item, i) =>
-    `<div class="context-menu-item ${item.danger ? 'danger' : ''}" data-index="${i}">${item.icon || ''} ${item.label}</div>`
-  ).join('');
-  contextMenu.style.left = x + 'px';
-  contextMenu.style.top = y + 'px';
-  contextMenu.classList.add('active');
+function showContextMenu(x, y, items, customHtml) {
+  if (customHtml !== undefined) {
+    contextMenu.innerHTML = customHtml;
+    contextMenu.classList.add('active');
+  } else {
+    contextMenu.innerHTML = items.map((item, i) =>
+      `<div class="context-menu-item ${item.danger ? 'danger' : ''}" data-index="${i}">${item.icon || ''} ${item.label}</div>`
+    ).join('');
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    contextMenu.classList.add('active');
 
-  contextMenu.querySelectorAll('.context-menu-item').forEach((el, i) => {
-    el.onclick = () => {
-      contextMenu.classList.remove('active');
-      items[i].action();
-    };
-  });
+    contextMenu.querySelectorAll('.context-menu-item').forEach((el, i) => {
+      el.onclick = (ev) => {
+        ev.stopPropagation();
+        items[i].action();
+      };
+    });
+  }
+  // Keep menu inside viewport
+  const rect = contextMenu.getBoundingClientRect();
+  if (rect.right > window.innerWidth - 8) contextMenu.style.left = Math.max(8, window.innerWidth - rect.width - 8) + 'px';
+  if (rect.bottom > window.innerHeight - 8) contextMenu.style.top = Math.max(8, window.innerHeight - rect.height - 8) + 'px';
 }
 
 /* ============================================================
@@ -2916,11 +4790,20 @@ function switchView(view) {
     }
   });
 
+  // Show search bar only in board view
+  const searchBar = document.getElementById('search-bar');
+  if (searchBar) {
+    searchBar.style.display = view === 'board' ? '' : 'none';
+    document.body.classList.toggle('has-toolbar', view === 'board');
+  }
+
   // Hide add-list button in non-board views
   const addListBtn = document.getElementById('add-list-btn');
   if (addListBtn) {
     addListBtn.style.display = view === 'board' ? '' : 'none';
   }
+
+  boardEl.classList.toggle('board-filtered', isFilterActive() && view === 'board');
 
   // Render stats view when switching to stats
   if (view === 'stats') {
@@ -2979,6 +4862,72 @@ function toggleTheme() {
 
 document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
+/* ============================================================
+   Board Switcher / Tool Button / Search / Palette bindings
+   ============================================================ */
+document.getElementById('board-switcher-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const menu = document.getElementById('board-switcher-menu');
+  if (menu.classList.contains('active')) { menu.classList.remove('active'); return; }
+  const r = e.currentTarget.getBoundingClientRect();
+  openBoardSwitcher(r.left, r.bottom + 6);
+});
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('board-switcher-menu');
+  if (menu.classList.contains('active') && !menu.contains(e.target) && !e.target.closest('#board-switcher-btn')) {
+    menu.classList.remove('active');
+  }
+});
+
+document.getElementById('tool-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  openToolMenu(r.left, r.bottom + 6);
+});
+
+document.getElementById('archive-close').addEventListener('click', closeArchiveModal);
+document.getElementById('archive-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('archive-modal')) closeArchiveModal();
+});
+document.getElementById('shortcuts-close').addEventListener('click', closeShortcutsModal);
+document.getElementById('shortcuts-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('shortcuts-modal')) closeShortcutsModal();
+});
+document.getElementById('lightbox').addEventListener('click', () => {
+  document.getElementById('lightbox').classList.remove('active');
+});
+
+const searchInputEl = document.getElementById('search-input');
+searchInputEl.addEventListener('input', () => {
+  searchQuery = searchInputEl.value.trim();
+  applySearchStateUI();
+  updateSearchCount();
+});
+document.getElementById('search-clear').addEventListener('click', () => {
+  searchQuery = '';
+  filterLabels.clear();
+  filterDue.clear();
+  searchInputEl.value = '';
+  applySearchStateUI();
+  updateSearchCount();
+});
+document.getElementById('filter-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  openFilterMenu(r.left, r.bottom + 6);
+});
+
+document.getElementById('palette-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('palette-overlay')) closePalette();
+});
+document.getElementById('palette-input').addEventListener('input', (e) => {
+  paletteSelected = 0;
+  paletteRenderList(e.target.value);
+});
+document.getElementById('palette-input').addEventListener('keydown', paletteKeydown);
+
+document.addEventListener('keydown', handleGlobalKeydown);
+
 // Load saved theme
 (function initTheme() {
   let saved = null;
@@ -3010,7 +4959,7 @@ function getCssVar(name) {
 
 function renderStatsView() {
   const allCards = [];
-  state.lists.forEach(list => {
+  getActiveBoard().lists.forEach(list => {
     (list.cards || []).forEach(card => {
       allCards.push({ ...card, listTitle: list.title });
     });
@@ -3382,7 +5331,7 @@ let calYear, calMonth, calWeekStart, calViewMode = 'month';
 
 function getAllCardsWithDueDate() {
   const result = [];
-  state.lists.forEach(list => {
+  getActiveBoard().lists.forEach(list => {
     (list.cards || []).forEach(card => {
       if (card.dueDate) {
         result.push({ ...card, listTitle: list.title, listId: list.id });
@@ -3479,25 +5428,34 @@ function renderDayCell(day, isOtherMonth, isToday, cardsWithDue, year, month) {
 
   const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-  let dotsHtml = '';
+  let chipsHtml = '';
   if (cardsWithDue.length > 0) {
-    const maxDots = 3;
-    dotsHtml = '<div class="cal-day-dots">';
-    for (let i = 0; i < Math.min(cardsWithDue.length, maxDots); i++) {
+    const maxChips = 3;
+    chipsHtml = '<div class="cal-day-chips">';
+    for (let i = 0; i < Math.min(cardsWithDue.length, maxChips); i++) {
       const card = cardsWithDue[i];
       const labelColor = card.labels && card.labels.length > 0
         ? (LABEL_COLORS[card.labels[0].color] || LABEL_COLORS.blue).bg
         : '#3b82f6';
-      dotsHtml += `<span class="cal-day-dot" style="background:${labelColor}"></span>`;
+      chipsHtml += `<div class="cal-day-chip" data-card-id="${card.id}" draggable="false">
+        <span class="cal-day-chip-dot" style="background:${labelColor}"></span>
+        <span class="cal-day-chip-title">${escapeHtml(card.title)}</span>
+      </div>`;
     }
-    if (cardsWithDue.length > maxDots) {
-      dotsHtml += `<span class="cal-day-more">+${cardsWithDue.length - maxDots}</span>`;
+    if (cardsWithDue.length > maxChips) {
+      chipsHtml += `<div class="cal-day-chip cal-day-chip-more">+${cardsWithDue.length - maxChips} 更多</div>`;
     }
-    dotsHtml += '</div>';
+    chipsHtml += '</div>';
+  }
+
+  let dotsHtml = '';
+  if (cardsWithDue.length > 3) {
+    dotsHtml = '<div class="cal-day-dots"><span class="cal-day-more">+' + (cardsWithDue.length - 3) + '</span></div>';
   }
 
   return `<div class="${cls}" data-date="${dateStr}" data-has-cards="${cardsWithDue.length > 0 ? '1' : '0'}">
     <div class="cal-day-header">${day}</div>
+    ${chipsHtml}
     ${dotsHtml}
   </div>`;
 }
@@ -3506,10 +5464,12 @@ function attachDayCellEvents() {
   document.querySelectorAll('#cal-grid .cal-day[data-has-cards="1"]').forEach(cell => {
     cell.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (e.target.closest('.cal-day-chip')) return;
       const dateStr = cell.dataset.date;
       openDayPopup(dateStr);
     });
   });
+  attachCalCardDrag();
 }
 
 function openDayPopup(dateStr) {
@@ -3564,6 +5524,17 @@ function openCardById(cardId) {
   // Small delay to let board render
   setTimeout(() => {
     const cardEl = document.querySelector(`.card[data-card-id="${cardId}"]`);
+    if (!cardEl && isFilterActive()) {
+      // Card hidden by current search/filter: clear filters and retry
+      searchQuery = '';
+      filterLabels.clear();
+      filterDue.clear();
+      document.getElementById('search-input').value = '';
+      applySearchStateUI();
+      updateSearchCount();
+      setTimeout(() => openCardById(cardId), 120);
+      return;
+    }
     if (cardEl) {
       const list = state.lists.find(l => l.cards.some(c => c.id === cardId));
       const card = list ? list.cards.find(c => c.id === cardId) : null;
@@ -3589,7 +5560,7 @@ function renderWeekView(gridEl) {
     const isToday = day.getTime() === today.getTime();
     const cardsOnDay = allCards.filter(card => card.dueDate === dateStr);
 
-    html += `<div class="week-day${isToday ? ' today' : ''}">
+    html += `<div class="week-day${isToday ? ' today' : ''}" data-date="${dateStr}">
       <div class="week-day-header">
         <span class="week-day-date">${day.getMonth() + 1}/${day.getDate()}</span>
         <span class="week-day-label">${weekDayNames[day.getDay()]}</span>
@@ -3627,6 +5598,114 @@ function renderWeekView(gridEl) {
       openCardById(cardId);
     });
   });
+  attachCalCardDrag();
+}
+
+/* ============================================================
+   Calendar Drag to Reschedule
+   ============================================================ */
+function resetCalendarPosition() {
+  calYear = undefined;
+  calMonth = undefined;
+  calWeekStart = undefined;
+}
+
+function findCardAndList(cardId) {
+  for (const list of getActiveBoard().lists) {
+    const card = list.cards.find(c => c.id === cardId);
+    if (card) return { card, list };
+  }
+  return null;
+}
+
+function getTargetDateFromPoint(clientX, clientY) {
+  const cells = document.querySelectorAll('#cal-grid .cal-day[data-date], #cal-grid .week-day[data-date]');
+  for (const cell of cells) {
+    const r = cell.getBoundingClientRect();
+    if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+      return cell;
+    }
+  }
+  return null;
+}
+
+function rescheduleCard(cardId, newDateStr) {
+  const found = findCardAndList(cardId);
+  if (!found || !found.card.dueDate || found.card.dueDate === newDateStr) return;
+  snapshotForUndo();
+  const oldDate = found.card.dueDate;
+  found.card.dueDate = newDateStr;
+  saveState();
+  renderCalendarView();
+  renderBoard();
+  const [y, m, d] = newDateStr.split('-').map(Number);
+  showToast(`「${found.card.title}」已改期至 ${m}月${d}日`, null, '撤销', () => {
+    found.card.dueDate = oldDate;
+    saveState();
+    renderCalendarView();
+    renderBoard();
+    showToast('已撤销改期');
+  });
+}
+
+let calDragCtx = null;
+
+function attachCalCardDrag() {
+  const cardsEls = document.querySelectorAll('#cal-grid .cal-day-chip[data-card-id], #cal-grid .week-card[data-card-id]');
+  cardsEls.forEach(el => {
+    el.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const cardId = el.dataset.cardId;
+      const found = findCardAndList(cardId);
+      if (!found) return;
+      const startX = e.clientX, startY = e.clientY;
+      let started = false;
+      let ghost = null;
+      let hoverCell = null;
+
+      const cleanup = () => {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        if (ghost) ghost.remove();
+        if (hoverCell) hoverCell.classList.remove('drag-over-day');
+        el.classList.remove('dragging');
+      };
+
+      function onMove(ev) {
+        const dx = ev.clientX - startX, dy = ev.clientY - startY;
+        if (!started && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+          started = true;
+          ghost = document.createElement('div');
+          ghost.className = 'cal-drag-ghost';
+          ghost.textContent = found.card.title;
+          document.body.appendChild(ghost);
+          el.classList.add('dragging');
+        }
+        if (!started) return;
+        ev.preventDefault();
+        ghost.style.left = (ev.clientX + 12) + 'px';
+        ghost.style.top = (ev.clientY + 10) + 'px';
+        const cell = getTargetDateFromPoint(ev.clientX, ev.clientY);
+        if (cell !== hoverCell) {
+          if (hoverCell) hoverCell.classList.remove('drag-over-day');
+          hoverCell = cell;
+          if (hoverCell) hoverCell.classList.add('drag-over-day');
+        }
+      }
+
+      function onUp(ev) {
+        if (started) {
+          const cell = getTargetDateFromPoint(ev.clientX, ev.clientY);
+          if (cell && cell.dataset.date) rescheduleCard(cardId, cell.dataset.date);
+        }
+        cleanup();
+      }
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  });
 }
 
 // Calendar navigation events
@@ -3660,7 +5739,7 @@ document.getElementById('cal-today-btn').addEventListener('click', () => {
   renderCalendarView();
 });
 
-// Month/Week toggle
+/* Month/Week toggle */
 document.querySelectorAll('.cal-toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const view = btn.dataset.calview;
@@ -3675,13 +5754,13 @@ document.querySelectorAll('.cal-toggle-btn').forEach(btn => {
    Init
    ============================================================ */
 loadState();
-// Migrate old default board title
-if (state.boardTitle === '我的项目看板') {
-  state.boardTitle = '东青Trello看板';
-  saveState();
-}
-boardTitleEl.textContent = state.boardTitle;
+syncActiveBoardAlias();
+updateBoardSwitcherUI();
 renderBoard();
+applyCustomBackground();
+// Show search bar on initial board view (switchView only fires on change)
+document.getElementById('search-bar').style.display = '';
+document.body.classList.add('has-toolbar');
 
 // Prevent default drag behaviors
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -3708,7 +5787,7 @@ if ('Notification' in window && Notification.permission === 'default') {
 function checkDueNotifications() {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   const today = new Date().toISOString().split('T')[0];
-  state.lists.forEach(list => {
+  getActiveBoard().lists.forEach(list => {
     list.cards.forEach(card => {
       if (card.dueDate === today && !card.completedAt) {
         new Notification('\u{1f4cb} 今日到期提醒', { body: `"${card.title}" 今天到期！` });
@@ -3725,7 +5804,7 @@ setTimeout(checkDueNotifications, 5000);
 
 function getAllCardsWithContext() {
   const cards = [];
-  state.lists.forEach(list => {
+  getActiveBoard().lists.forEach(list => {
     (list.cards || []).forEach(card => {
       cards.push({
         title: card.title,
@@ -3886,7 +5965,7 @@ function generateRulePrompt() {
   let prompt = `当前日期：${todayStr}\n\n`;
   prompt += '以下是看板中所有卡片的数据：\n\n';
 
-  state.lists.forEach(list => {
+  getActiveBoard().lists.forEach(list => {
     prompt += `## 列表：${list.title}\n`;
     if (list.cards.length === 0) {
       prompt += '(空)\n\n';
