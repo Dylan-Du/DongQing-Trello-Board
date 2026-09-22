@@ -2091,6 +2091,12 @@ body.has-toolbar #board {
 .toast .toast-undo:disabled { opacity: 0.5; cursor: default; }
 
 /* ===== Custom Background ===== */
+/* When a custom background is active, make the body itself transparent so the
+   fixed ::before image layer (z-index -1) is actually visible. */
+body.custom-bg {
+  background: transparent !important;
+  background-image: none !important;
+}
 body.custom-bg::before {
   content: '';
   position: fixed;
