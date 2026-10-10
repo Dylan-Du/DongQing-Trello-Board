@@ -18,7 +18,7 @@
   "build": {
     "appId": "com.dongqing.trello-board",
     "productName": "东青Trello看板",
-    "artifactName": "东青Trello看板-${version}-${arch}.${ext}",
+    "artifactName": "DongQing-Trello-Board-${version}-${arch}.${ext}",
     "copyright": "Copyright © 2026 DongQing",
     "directories": {
       "output": "release",

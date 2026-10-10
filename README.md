@@ -38,7 +38,7 @@
 
 ### 方法一：下载 DMG 安装包
 
-从 [Releases](https://github.com/Dylan-Du/DongQing-Trello-Board/releases) 页面下载最新版 `东青Trello看板-*-arm64.dmg`，双击安装。
+从 [Releases](https://github.com/Dylan-Du/DongQing-Trello-Board/releases) 页面下载最新版 `DongQing-Trello-Board-*-arm64.dmg`，双击安装。
 
 > 当前版本：**v1.2.1**（Apple Silicon）
 
