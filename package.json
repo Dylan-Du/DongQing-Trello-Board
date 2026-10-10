@@ -1,7 +1,71 @@
 {
   "name": "dongqing-trello-board",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "东青Trello看板 - 高颜值本地看板应用，支持多看板、搜索筛选、归档撤销、Markdown、附件、日历拖拽改期、命令面板",
   "main": "main.js",
-  "author": "DongQing"
+  "author": "DongQing",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "build:arm64": "electron-builder --mac --arm64",
+    "pack": "electron-builder --mac --dir"
+  },
+  "devDependencies": {
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.dongqing.trello-board",
+    "productName": "东青Trello看板",
+    "artifactName": "东青Trello看板-${version}-${arch}.${ext}",
+    "copyright": "Copyright © 2026 DongQing",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "trello-board.html",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "CFBundleDisplayName": "东青Trello看板",
+        "CFBundleName": "东青Trello看板",
+        "NSHumanReadableCopyright": "Copyright © 2026 DongQing"
+      }
+    },
+    "dmg": {
+      "title": "东青Trello看板 ${version}",
+      "icon": "icon.icns",
+      "contents": [
+        {
+          "x": 140,
+          "y": 220
+        },
+        {
+          "x": 400,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
 }

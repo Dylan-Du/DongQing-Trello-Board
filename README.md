@@ -40,7 +40,13 @@
 
 从 [Releases](https://github.com/Dylan-Du/DongQing-Trello-Board/releases) 页面下载最新版 `东青Trello看板-*-arm64.dmg`，双击安装。
 
-> 当前版本：**v1.2.0**（Apple Silicon）
+> 当前版本：**v1.2.1**（Apple Silicon）
+
+> ⚠️ 本应用采用 ad-hoc 签名（未做 Apple 公证）。若首次打开提示"已损坏，无法打开"，请在终端执行以下命令移除隔离属性后再打开：
+>
+> ```bash
+> xattr -cr /Applications/东青Trello看板.app
+> ```
 
 ### 方法二：源码运行
 
@@ -73,6 +79,8 @@ npm run build
 ├── trello-board.html    # 看板前端（单文件，包含完整 UI/CSS/JS）
 ├── icon.icns            # macOS 应用图标
 ├── icon-source.svg      # 图标源文件
+├── build/
+│   └── entitlements.mac.plist  # macOS 签名权限配置
 ├── package.json         # 项目配置 & 打包配置
 └── LICENSE              # MIT 开源协议
 ```
