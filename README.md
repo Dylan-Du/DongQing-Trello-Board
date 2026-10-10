@@ -32,7 +32,7 @@
 - ⌨️ **命令面板** — `Ctrl+K` 搜索卡片 + 执行命令（切视图/切主题/导入导出/切换看板…）
 - 🔧 **全局快捷键** — `Ctrl+F` 搜索、`Ctrl+1/2/3` 切视图、`Ctrl+J` 切主题、`Ctrl+L` 工具菜单、`?` 帮助
 - 📤 **备份与恢复** — JSON 导出/导入，旧版数据自动无损迁移
-- 🖼️ **自定义背景** — 自选背景图，自动调暗保证可读性
+- 🖼️ **自定义背景** — 自选背景图（自动压缩存储），支持调亮/调暗，一键恢复默认
 
 ## 📦 安装
 
@@ -40,7 +40,7 @@
 
 从 [Releases](https://github.com/Dylan-Du/DongQing-Trello-Board/releases) 页面下载最新版 `DongQing-Trello-Board-*-arm64.dmg`，双击安装。
 
-> 当前版本：**v1.2.1**（Apple Silicon）
+> 当前版本：**v1.2.2**（Apple Silicon）
 
 > ⚠️ 本应用采用 ad-hoc 签名（未做 Apple 公证）。若首次打开提示"已损坏，无法打开"，请在终端执行以下命令移除隔离属性后再打开：
 >
@@ -75,7 +75,8 @@ npm run build
 ## 📁 项目结构
 
 ```
-├── main.js              # Electron 主进程（窗口配置）
+├── main.js              # Electron 主进程（窗口配置 & 主题同步）
+├── preload.js           # 预加载脚本（连接渲染层与主进程的主题通道）
 ├── trello-board.html    # 看板前端（单文件，包含完整 UI/CSS/JS）
 ├── icon.icns            # macOS 应用图标
 ├── icon-source.svg      # 图标源文件

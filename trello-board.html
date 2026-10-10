@@ -58,15 +58,15 @@
 [data-theme="light"] {
   --bg: #f0f4f8;
   --bg-elev: #ffffff;
-  --list-bg: rgba(255, 255, 255, 0.7);
-  --list-border: rgba(0,0,0,0.06);
-  --card-bg: rgba(255, 255, 255, 0.75);
-  --card-bg-hover: rgba(245, 247, 250, 0.85);
+  --list-bg: rgba(222, 229, 238, 0.72);
+  --list-border: rgba(15, 23, 42, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --card-bg-hover: rgba(255, 255, 255, 1);
   --text: #1e293b;
   --text-dim: #64748b;
   --text-faint: #94a3b8;
-  --shadow-card: 0 0 0 1px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card-hover: 0 0 0 1px rgba(59,130,246,0.1), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-card: 0 0 0 1px rgba(15,23,42,0.05), 0 1px 3px rgba(15,23,42,0.08);
+  --shadow-card-hover: 0 0 0 1px rgba(59,130,246,0.25), 0 4px 12px rgba(15,23,42,0.1);
   --shadow-drag: 0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(59,130,246,0.1);
   --shadow-modal: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
   --hover-overlay: rgba(59,130,246,0.05);
@@ -80,7 +80,7 @@
   --overlay-bg: rgba(15, 23, 42, 0.2);
   --scrollbar-thumb: rgba(0,0,0,0.1);
   --scrollbar-thumb-hover: rgba(0,0,0,0.18);
-  --shadow-list: 0 0 0 1px rgba(0,0,0,0.03);
+  --shadow-list: 0 0 0 1px rgba(15,23,42,0.04), 0 6px 18px rgba(15,23,42,0.06);
   --surface-tint: rgba(59,130,246,0.03);
   --surface-tint-light: rgba(59,130,246,0.02);
   --bg-glow-1: rgba(59, 130, 246, 0.04);
@@ -115,6 +115,17 @@ body {
     linear-gradient(180deg, #f0f4f8 0%, #e8eef5 100%),
     radial-gradient(ellipse at 15% 0%, var(--bg-glow-1) 0%, transparent 55%),
     radial-gradient(ellipse at 85% 100%, var(--bg-glow-2) 0%, transparent 55%);
+}
+
+/* Theme switching: disable all transitions for one frame so every themed surface
+   (page, header, lists, cards) repaints to the new palette atomically. Otherwise
+   elements that animate their own background (e.g. .card) would tween from the
+   previous colour and briefly show dark cards on a light background. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 /* ===== Scrollbar ===== */
@@ -2091,11 +2102,15 @@ body.has-toolbar #board {
 .toast .toast-undo:disabled { opacity: 0.5; cursor: default; }
 
 /* ===== Custom Background ===== */
-/* When a custom background is active, make the body itself transparent so the
-   fixed ::before image layer (z-index -1) is actually visible. */
+/* When a custom background is active, make both the body and the root element
+   transparent so the fixed ::before image layer (z-index -1) is actually visible
+   and is not blended with the theme background colour. */
 body.custom-bg {
   background: transparent !important;
   background-image: none !important;
+}
+html:has(body.custom-bg) {
+  background: transparent;
 }
 body.custom-bg::before {
   content: '';
@@ -2105,8 +2120,9 @@ body.custom-bg::before {
   background-image: var(--custom-bg-image);
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
 }
-body.custom-bg-dim::before { filter: brightness(0.55); }
+body.custom-bg-dim::before { filter: brightness(0.72) saturate(1.05); }
 
 /* ===== Shortcuts Help ===== */
 .shortcuts-body { flex: 1; overflow-y: auto; padding: 14px 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; }
@@ -2415,7 +2431,7 @@ let state = {
   lists: [],  // active board alias (for legacy references)
   archive: [],
   bgImage: null,
-  bgDim: true,
+  bgDim: false,
 };
 
 let uidCounter = 0;
@@ -2489,7 +2505,7 @@ function loadState() {
           activeBoardId: board.id,
           archive: Array.isArray(parsed.archive) ? parsed.archive : [],
           bgImage: parsed.bgImage || null,
-          bgDim: parsed.bgDim !== false,
+          bgDim: parsed.bgDim === true,
           // preserve AI config from v1
           aiApiKey: parsed.aiApiKey || '',
           aiEndpoint: parsed.aiEndpoint || 'https://api.deepseek.com/chat/completions',
@@ -2514,7 +2530,7 @@ function loadState() {
     activeBoardId: board.id,
     archive: [],
     bgImage: null,
-    bgDim: true,
+    bgDim: false,
     aiApiKey: '',
     aiEndpoint: 'https://api.deepseek.com/chat/completions',
     aiModel: 'deepseek-chat',
@@ -2553,7 +2569,7 @@ function syncActiveBoardAlias() {
 }
 
 function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); return true; } catch(e) { return false; }
 }
 
 function switchBoard(boardId) {
@@ -3143,12 +3159,37 @@ function openImportPicker() {
 
 function applyCustomBackground() {
   document.body.classList.toggle('custom-bg', !!state.bgImage);
-  document.body.classList.toggle('custom-bg-dim', !!state.bgImage && state.bgDim !== false);
+  document.body.classList.toggle('custom-bg-dim', !!state.bgImage && state.bgDim === true);
   if (state.bgImage) {
     document.body.style.setProperty('--custom-bg-image', `url("${state.bgImage}")`);
   } else {
     document.body.style.removeProperty('--custom-bg-image');
   }
+}
+
+/* Downscale + re-encode an image data URL so that the stored value fits in
+   localStorage (which caps at ~5MB per origin). Returns a Promise<string>. */
+function compressImageDataURL(dataUrl, maxDim, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.max(1, Math.round(img.naturalWidth * scale));
+        const h = Math.max(1, Math.round(img.naturalHeight * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch (e) {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
 }
 
 function openBgPicker() {
@@ -3157,11 +3198,32 @@ function openBgPicker() {
   input.onchange = () => {
     const file = input.files && input.files[0];
     if (!file) return;
-    if (file.size > 6 * 1024 * 1024) { showToast('背景图片过大（超过 6MB）', 'error'); return; }
+    if (!/^image\//.test(file.type || '')) { showToast('请选择图片文件', 'error'); return; }
+    if (file.size > 25 * 1024 * 1024) { showToast('背景图片过大（超过 25MB）', 'error'); return; }
     const reader = new FileReader();
-    reader.onload = () => {
-      state.bgImage = reader.result;
-      saveState();
+    reader.onload = async () => {
+      const raw = reader.result;
+      snapshotForUndo();
+      const prev = state.bgImage;
+      // Try the original first when it is small enough (keeps PNG transparency),
+      // then progressively downscale/compress until the state fits in storage.
+      const attempts = file.size <= 900 * 1024
+        ? [{ passthrough: true }, { maxDim: 2560, q: 0.86 }, { maxDim: 1920, q: 0.8 }, { maxDim: 1440, q: 0.72 }, { maxDim: 1080, q: 0.65 }]
+        : [{ maxDim: 2560, q: 0.86 }, { maxDim: 1920, q: 0.8 }, { maxDim: 1440, q: 0.72 }, { maxDim: 1080, q: 0.65 }];
+      let saved = false;
+      for (const a of attempts) {
+        const candidate = a.passthrough ? raw : await compressImageDataURL(raw, a.maxDim, a.q);
+        if (typeof candidate !== 'string' || candidate.length < 32) continue;
+        state.bgImage = candidate;
+        if (saveState()) { saved = true; break; }
+      }
+      if (!saved) {
+        state.bgImage = prev;
+        saveState();
+        applyCustomBackground();
+        showToast('背景图片过大，无法保存，请换一张更小的图片', 'error');
+        return;
+      }
       applyCustomBackground();
       showToast('背景已更新', null, '撤销', () => { undoPop(); applyCustomBackground(); });
     };
@@ -3171,26 +3233,35 @@ function openBgPicker() {
 }
 
 function openToolMenu(x, y) {
-  showContextMenu(x, y, [
+  const items = [
     { label: '导出备份（JSON）', icon: '📤', action: exportData },
     { label: '导入备份', icon: '📥', action: openImportPicker },
     { label: '打开归档站', icon: '📦', action: openArchiveModal },
     { label: '自定义背景图片', icon: '🖼', action: openBgPicker },
-    { label: state.bgImage ? '恢复默认背景' : '背景调亮/调暗', icon: state.bgImage ? '↺' : '◐', action: () => {
-      if (state.bgImage) {
+  ];
+  if (state.bgImage) {
+    items.push({
+      label: state.bgDim === true ? '背景调亮' : '背景调暗',
+      icon: state.bgDim === true ? '☀️' : '🌙',
+      action: () => {
+        state.bgDim = state.bgDim !== true;
+        saveState();
+        applyCustomBackground();
+        showToast(state.bgDim ? '背景已调暗' : '背景已调亮');
+      },
+    });
+    items.push({
+      label: '恢复默认背景', icon: '↺', action: () => {
         snapshotForUndo();
         state.bgImage = null;
         saveState();
         applyCustomBackground();
         showToast('已恢复默认背景', null, '撤销', () => { undoPop(); applyCustomBackground(); });
-      } else if (state.bgImage) {
-        state.bgDim = !state.bgDim;
-        saveState();
-        applyCustomBackground();
-      }
-    }},
-    { label: '键盘快捷键', icon: '⌨️', action: openShortcutsModal },
-  ]);
+      },
+    });
+  }
+  items.push({ label: '键盘快捷键', icon: '⌨️', action: openShortcutsModal });
+  showContextMenu(x, y, items);
 }
 
 /* ============================================================
@@ -4846,24 +4917,26 @@ function applyTheme(theme) {
   } else {
     document.documentElement.removeAttribute('data-theme');
   }
+  // Keep the native (Electron) window background in sync with the theme.
+  try { if (window.desktopTheme) window.desktopTheme.set(theme === 'light' ? 'light' : 'dark'); } catch(e) {}
 }
 
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'light' ? 'dark' : 'light';
-  // Add transition class for smooth theme switch
-  document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-  const allElements = document.querySelectorAll('.list, .card, .list-header, .list-footer, .modal-header, .modal-body, .modal-footer, .context-menu, #header, .add-list-placeholder, .subtask-item');
-  allElements.forEach(el => {
-    el.style.transition = 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease';
-  });
+  // Switch every themed surface atomically. Without this, elements that animate
+  // their own background (e.g. .card) would transition from the previous colour
+  // and briefly render dark cards on a light background (and vice versa).
+  document.documentElement.classList.add('theme-switching');
   applyTheme(next);
   try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
-  // Clean up transitions after animation
-  setTimeout(() => {
-    document.body.style.transition = '';
-    allElements.forEach(el => { el.style.transition = ''; });
-  }, 350);
+  // Commit the new colours before restoring transitions.
+  void document.body.offsetHeight;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('theme-switching');
+    });
+  });
 }
 
 document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
